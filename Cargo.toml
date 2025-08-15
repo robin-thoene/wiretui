@@ -1,0 +1,8 @@
+[workspace]
+resolver = "3"
+members = ["src-libs/*", "src-bin/*"]
+
+[workspace.package]
+version = "0.0.0"
+authors = []      # TODO: add author
+license = "MIT"

@@ -1,0 +1,11 @@
+[package]
+name = "ports"
+edition = "2024"
+description = "Defines all inbound and outbound traits"
+publish = false
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+domain = { path = "../domain" }

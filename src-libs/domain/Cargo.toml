@@ -1,0 +1,10 @@
+[package]
+name = "domain"
+edition = "2024"
+description = "Pure core structs and logic"
+publish = false
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
