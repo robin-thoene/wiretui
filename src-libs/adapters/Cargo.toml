@@ -11,3 +11,6 @@ license.workspace = true
 application = { path = "../application" }
 domain = { path = "../domain" }
 ports = { path = "../ports" }
+crossterm = "0.29.0"
+ratatui = "0.29.0"
+walkdir = "2.5.0"

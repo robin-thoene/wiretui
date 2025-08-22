@@ -1,8 +1,9 @@
 [package]
-name = "app"             # TODO: use the name of your application
+name = "wiretui-bin"
 edition = "2024"
 version.workspace = true
 authors.workspace = true
 license.workspace = true
 
 [dependencies]
+adapters = { path = "../../src-libs/adapters" }
