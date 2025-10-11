@@ -14,3 +14,4 @@ ports = { path = "../ports" }
 crossterm = "0.29.0"
 ratatui = "0.29.0"
 walkdir = "2.5.0"
+dbus = "0.9.9"

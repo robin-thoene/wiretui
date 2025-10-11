@@ -1,12 +1,17 @@
 mod custom_widgets;
 mod styles;
 
-use crate::inbound::tui::custom_widgets::{
-    connection_list::{ConnectionList, ConnectionListState},
-    keymaps_popup::KeymapsPopup,
-    status_bar::StatusBar,
+use crate::{
+    inbound::tui::custom_widgets::{
+        connection_list::{ConnectionList, ConnectionListState},
+        keymaps_popup::KeymapsPopup,
+        status_bar::StatusBar,
+    },
+    outbound::network::NetworkServiceImpl,
 };
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
+use domain::models::Connection;
+use ports::outbound::network::NetworkService;
 use ratatui::{
     Frame,
     buffer::Buffer,
@@ -20,12 +25,12 @@ use walkdir::WalkDir;
 pub struct App {
     show_help: bool,
     exit: bool,
-    config_list: Connections,
+    connections: Connections,
 }
 
 #[derive(Debug, Default)]
 struct Connections {
-    connection_file_paths: Vec<String>,
+    value: Vec<Connection>,
     connection_list_state: ConnectionListState,
 }
 
@@ -33,7 +38,7 @@ impl App {
     pub fn run(&mut self) -> io::Result<()> {
         let mut terminal = ratatui::init();
         // Load all the available VPN config files only once at app startup
-        self.init_config_list();
+        self.init_connection_list();
         // Main loop
         while !self.exit {
             terminal.draw(|frame| self.draw(frame))?;
@@ -44,21 +49,25 @@ impl App {
         Ok(())
     }
 
-    /// Load the available VPN config files from the configured directory
+    /// Load the available VPN connections
     /// and import them to the app state
-    fn init_config_list(&mut self) {
-        let config_files = self.get_wireguard_config_files();
-        self.config_list.connection_file_paths = config_files;
+    fn init_connection_list(&mut self) {
+        // TODO: This is just for testing quickly, move this into correct layer and gracefully
+        // handle error
+        let c = NetworkServiceImpl::default()
+            .get_imported_vpn_connections()
+            .unwrap_or_default();
+        self.connections.value = c;
         if self
-            .config_list
+            .connections
             .connection_list_state
             .list_state
             .selected()
             .is_none()
-            && !self.config_list.connection_file_paths.is_empty()
+            && !self.connections.value.is_empty()
         {
             // Ensure that at any time there is already a selected item
-            self.config_list
+            self.connections
                 .connection_list_state
                 .list_state
                 .select(Some(0));
@@ -105,12 +114,12 @@ impl App {
         match key_event.code {
             KeyCode::Char('?') if !self.show_help => self.open_help(),
             KeyCode::Char('j') => self
-                .config_list
+                .connections
                 .connection_list_state
                 .list_state
                 .select_next(),
             KeyCode::Char('k') => self
-                .config_list
+                .connections
                 .connection_list_state
                 .list_state
                 .select_previous(),
@@ -135,7 +144,7 @@ impl App {
 
     /// Get the file locations of all available VPN config files
     /// from the configured directory
-    fn get_wireguard_config_files(&self) -> Vec<String> {
+    fn _get_wireguard_config_files(&self) -> Vec<String> {
         let mut res = vec![];
         if let Some(mut dir) = env::home_dir() {
             dir.push("wireguard");
@@ -159,12 +168,12 @@ impl Widget for &mut App {
 
         let connection_list = ConnectionList {
             highlight: !self.show_help,
-            connections: &self.config_list.connection_file_paths,
+            connections: &self.connections.value,
         };
         connection_list.render(
             main_layout[0],
             buf,
-            &mut self.config_list.connection_list_state,
+            &mut self.connections.connection_list_state,
         );
 
         let status_bar = StatusBar {};

@@ -1,4 +1,5 @@
 use crate::inbound::tui::styles::{HIGHLIGHT_STYLE, SELECTED_STYLE};
+use domain::models::Connection;
 use ratatui::{
     style::Style,
     text::Line,
@@ -11,7 +12,7 @@ use ratatui::{
 /// Can be used to activate/deactivate VPN connections
 pub struct ConnectionList<'a> {
     pub highlight: bool,
-    pub connections: &'a Vec<String>,
+    pub connections: &'a Vec<Connection>,
 }
 
 #[derive(Debug, Default)]
@@ -44,7 +45,7 @@ impl<'a> StatefulWidget for ConnectionList<'a> {
         let config_values_list_items: Vec<ListItem> = self
             .connections
             .iter()
-            .map(|item| ListItem::from(item.as_str()))
+            .map(|item| ListItem::from(item.get_id()))
             .collect();
         let config_values_list = List::new(config_values_list_items)
             .block(config_values_block)
