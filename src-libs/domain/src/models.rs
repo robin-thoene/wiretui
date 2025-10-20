@@ -1,13 +1,13 @@
 /// Represents a single VPN connection
 #[derive(Debug)]
-pub struct Connection {
+pub struct WireGuardConnection {
     /// The identifier of the connection
     id: String,
     /// Whether the connection is currently active or not
     is_active: bool,
 }
 
-impl Connection {
+impl WireGuardConnection {
     /// Creates a new connection
     ///
     /// # Arguments
@@ -17,10 +17,10 @@ impl Connection {
     /// # Examples
     ///
     /// ```
-    /// use domain::models::Connection;
+    /// use domain::models::WireGuardConnection;
     ///
     /// let id = "unique-identifier";
-    /// let connection = Connection::new(id.to_string());
+    /// let connection = WireGuardConnection::new(id.to_string());
     /// assert_eq!(connection.get_id(), id);
     /// assert_eq!(connection.get_is_active(), &false);
     /// ```
@@ -36,10 +36,10 @@ impl Connection {
     /// # Examples
     ///
     /// ```
-    /// use domain::models::Connection;
+    /// use domain::models::WireGuardConnection;
     ///
     /// let id = "unique-identifier";
-    /// let connection = Connection::new(id.to_string());
+    /// let connection = WireGuardConnection::new(id.to_string());
     /// assert_eq!(connection.get_id(), id);
     /// ```
     pub fn get_id(&self) -> &str {
@@ -52,10 +52,10 @@ impl Connection {
     /// # Examples
     ///
     /// ```
-    /// use domain::models::Connection;
+    /// use domain::models::WireGuardConnection;
     ///
     /// let id = "unique-identifier";
-    /// let connection = Connection::new(id.to_string());
+    /// let connection = WireGuardConnection::new(id.to_string());
     /// assert_eq!(connection.get_is_active(), &false);
     /// ```
     pub fn get_is_active(&self) -> &bool {

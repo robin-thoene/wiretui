@@ -1,1 +1,1 @@
-pub mod network;
+pub mod wireguard_dbus;

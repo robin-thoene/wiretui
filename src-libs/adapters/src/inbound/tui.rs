@@ -7,11 +7,11 @@ use crate::{
         keymaps_popup::KeymapsPopup,
         status_bar::StatusBar,
     },
-    outbound::network::NetworkServiceImpl,
+    outbound::wireguard_dbus::WireGuardDBusImpl,
 };
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
-use domain::models::Connection;
-use ports::outbound::network::NetworkService;
+use domain::models::WireGuardConnection;
+use ports::outbound::wireguard::WireGuardService;
 use ratatui::{
     Frame,
     buffer::Buffer,
@@ -30,7 +30,7 @@ pub struct App {
 
 #[derive(Debug, Default)]
 struct Connections {
-    value: Vec<Connection>,
+    value: Vec<WireGuardConnection>,
     connection_list_state: ConnectionListState,
 }
 
@@ -54,8 +54,9 @@ impl App {
     fn init_connection_list(&mut self) {
         // TODO: This is just for testing quickly, move this into correct layer and gracefully
         // handle error
-        let c = NetworkServiceImpl::default()
-            .get_imported_vpn_connections()
+        let c = WireGuardDBusImpl::new()
+            .unwrap()
+            .get_imported_connections()
             .unwrap_or_default();
         self.connections.value = c;
         if self

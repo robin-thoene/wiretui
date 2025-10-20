@@ -1,5 +1,5 @@
 use crate::inbound::tui::styles::{HIGHLIGHT_STYLE, SELECTED_STYLE};
-use domain::models::Connection;
+use domain::models::WireGuardConnection;
 use ratatui::{
     style::Style,
     text::Line,
@@ -12,7 +12,7 @@ use ratatui::{
 /// Can be used to activate/deactivate VPN connections
 pub struct ConnectionList<'a> {
     pub highlight: bool,
-    pub connections: &'a Vec<Connection>,
+    pub connections: &'a Vec<WireGuardConnection>,
 }
 
 #[derive(Debug, Default)]
