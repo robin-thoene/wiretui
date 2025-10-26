@@ -32,21 +32,38 @@ pub struct NetworkManagerConnection {
     pub id: String,
 }
 
-/// Should only be used to try to parse the "connection" from the network manager connection
-/// settings into a corresponding model
-impl From<&HashMap<String, OwnedValue>> for NetworkManagerConnection {
-    fn from(value: &HashMap<String, OwnedValue>) -> Self {
-        Self {
-            t: value
-                .get("type")
-                .expect("'type' is expected to exist")
-                .downcast_ref()
+/// Potential error types that can occur when trying to parse a NetworkManager connection from
+/// D-Bus
+pub enum NetworkManagerConnectionParseError {
+    /// No connection found in input
+    Connection,
+    /// Could not find 'type' in input
+    Type,
+    /// Could not find 'id' in input
+    Id,
+}
+
+impl TryFrom<&HashMap<String, HashMap<String, OwnedValue>>> for NetworkManagerConnection {
+    type Error = NetworkManagerConnectionParseError;
+
+    fn try_from(
+        value: &HashMap<String, HashMap<String, OwnedValue>>,
+    ) -> std::result::Result<Self, Self::Error> {
+        let conn = value
+            .get("connection")
+            .ok_or(NetworkManagerConnectionParseError::Connection)?;
+        let t = conn
+            .get("type")
+            .ok_or(NetworkManagerConnectionParseError::Type)?;
+        let id = conn
+            .get("id")
+            .ok_or(NetworkManagerConnectionParseError::Id)?;
+        Ok(Self {
+            t: t.downcast_ref()
                 .expect("'type' is expected to be casted into String"),
-            id: value
-                .get("id")
-                .expect("'id' is expected to exist")
+            id: id
                 .downcast_ref()
                 .expect("'id' is expected to be casted into String"),
-        }
+        })
     }
 }

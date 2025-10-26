@@ -42,11 +42,11 @@ impl WireGuardService for WireGuardDBusImpl {
             let connection_proxy =
                 NetworkManagerConnectionProxyBlocking::new(&self.dbus_connection, connection)?;
             let settings = connection_proxy.get_settings()?;
-            if let Some(conn) = settings.get("connection") {
-                let conn = NetworkManagerConnection::from(conn);
-                if conn.t == "wireguard" {
-                    res.push(WireGuardConnection::new(conn.id));
-                }
+            let conn = NetworkManagerConnection::try_from(&settings);
+            if let Ok(conn) = conn
+                && conn.t == "wireguard"
+            {
+                res.push(WireGuardConnection::new(conn.id));
             }
         }
         Ok(res)
