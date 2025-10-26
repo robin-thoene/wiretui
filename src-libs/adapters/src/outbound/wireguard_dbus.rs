@@ -1,6 +1,5 @@
 use crate::outbound::dbus::{
-    NetworkManagerConnection, NetworkManagerConnectionProxyBlocking,
-    NetworkManagerSettingsProxyBlocking,
+    NetworkConnection, NetworkManagerConnectionProxyBlocking, NetworkManagerSettingsProxyBlocking,
 };
 use domain::models::WireGuardConnection;
 use ports::outbound::wireguard::WireGuardService;
@@ -42,9 +41,9 @@ impl WireGuardService for WireGuardDBusImpl {
             let connection_proxy =
                 NetworkManagerConnectionProxyBlocking::new(&self.dbus_connection, connection)?;
             let settings = connection_proxy.get_settings()?;
-            let conn = NetworkManagerConnection::try_from(&settings);
+            let conn = NetworkConnection::try_from(&settings);
             if let Ok(conn) = conn
-                && conn.t == "wireguard"
+                && conn.conn_type == "wireguard"
             {
                 res.push(WireGuardConnection::new(conn.id));
             }
