@@ -54,16 +54,14 @@ impl TryFrom<&HashMap<String, HashMap<String, OwnedValue>>> for NetworkManagerCo
             .ok_or(NetworkManagerConnectionParseError::Connection)?;
         let t = conn
             .get("type")
-            .ok_or(NetworkManagerConnectionParseError::Type)?;
+            .ok_or(NetworkManagerConnectionParseError::Type)?
+            .downcast_ref()
+            .map_err(|_| NetworkManagerConnectionParseError::Type)?;
         let id = conn
             .get("id")
-            .ok_or(NetworkManagerConnectionParseError::Id)?;
-        Ok(Self {
-            t: t.downcast_ref()
-                .expect("'type' is expected to be casted into String"),
-            id: id
-                .downcast_ref()
-                .expect("'id' is expected to be casted into String"),
-        })
+            .ok_or(NetworkManagerConnectionParseError::Id)?
+            .downcast_ref()
+            .map_err(|_| NetworkManagerConnectionParseError::Id)?;
+        Ok(Self { t, id })
     }
 }
