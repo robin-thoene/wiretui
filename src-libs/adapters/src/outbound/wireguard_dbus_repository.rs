@@ -1,16 +1,16 @@
-use crate::outbound::dbus::{
+use crate::outbound::dbus_repository::{
     NetworkConnection, NetworkManagerConnectionProxyBlocking, NetworkManagerSettingsProxyBlocking,
 };
 use domain::models::WireGuardConnection;
-use ports::outbound::wireguard::WireGuardService;
+use ports::outbound::wireguard_port::WireGuardPort;
 use zbus::blocking::Connection;
 
 /// Implementation that handles WireGuard using D-Bus
-pub struct WireGuardDBusImpl {
+pub struct WireGuardDBusRepository {
     dbus_connection: Connection,
 }
 
-impl WireGuardDBusImpl {
+impl WireGuardDBusRepository {
     /// Creates a new instance
     ///
     /// # Errors
@@ -30,7 +30,7 @@ impl WireGuardDBusImpl {
     }
 }
 
-impl WireGuardService for WireGuardDBusImpl {
+impl WireGuardPort for WireGuardDBusRepository {
     fn get_imported_connections(
         &self,
     ) -> Result<Vec<WireGuardConnection>, Box<dyn std::error::Error>> {

@@ -7,11 +7,11 @@ use crate::{
         keymaps_popup::KeymapsPopup,
         status_bar::StatusBar,
     },
-    outbound::wireguard_dbus::WireGuardDBusImpl,
+    outbound::wireguard_dbus_repository::WireGuardDBusRepository,
 };
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use domain::models::WireGuardConnection;
-use ports::outbound::wireguard::WireGuardService;
+use ports::outbound::wireguard_port::WireGuardPort;
 use ratatui::{
     Frame,
     buffer::Buffer,
@@ -54,7 +54,7 @@ impl App {
     fn init_connection_list(&mut self) {
         // TODO: This is just for testing quickly, move this into correct layer and gracefully
         // handle error
-        let c = WireGuardDBusImpl::new()
+        let c = WireGuardDBusRepository::new()
             .unwrap()
             .get_imported_connections()
             .unwrap_or_default();

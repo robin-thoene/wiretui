@@ -1,3 +1,3 @@
-mod dbus;
+mod dbus_repository;
 
-pub mod wireguard_dbus;
+pub mod wireguard_dbus_repository;
