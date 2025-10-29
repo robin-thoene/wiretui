@@ -1,8 +1,12 @@
-use adapters::inbound::tui::App;
+use adapters::{inbound::tui::App, outbound::wireguard_dbus_repository::WireGuardDBusRepository};
+use application::list_connections_usecase::ListConnectionsUseCase;
 use std::io;
 
 fn main() -> io::Result<()> {
-    let mut tui_app = App::default();
+    // Build the dependencies
+    let wireguard_dbus_adapter = WireGuardDBusRepository::new().expect("TODO: fix later");
+    let list_connections_usecase = ListConnectionsUseCase::new(wireguard_dbus_adapter);
+    // Build and run the TUI application
+    let mut tui_app = App::new(list_connections_usecase);
     tui_app.run()
 }
-

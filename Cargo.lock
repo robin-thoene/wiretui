@@ -1445,6 +1445,7 @@ name = "wiretui-bin"
 version = "0.0.0"
 dependencies = [
  "adapters",
+ "application",
 ]
 
 [[package]]

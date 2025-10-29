@@ -5,7 +5,7 @@ use domain::models::WireGuardConnection;
 use ports::outbound::wireguard_port::WireGuardPort;
 use zbus::blocking::Connection;
 
-/// Implementation that handles WireGuard using D-Bus
+/// Repository that handles WireGuard using D-Bus
 pub struct WireGuardDBusRepository {
     dbus_connection: Connection,
 }
@@ -20,9 +20,9 @@ impl WireGuardDBusRepository {
     /// # Examples
     ///
     /// ```
-    /// use adapters::outbound::wireguard_dbus::WireGuardDBusImpl;
+    /// use adapters::outbound::wireguard_dbus_repository::WireGuardDBusRepository;
     ///
-    /// let _res = WireGuardDBusImpl::new();
+    /// let _res = WireGuardDBusRepository::new();
     /// ```
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
         let dbus_connection = Connection::system()?;

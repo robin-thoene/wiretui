@@ -1,17 +1,14 @@
 mod custom_widgets;
 mod styles;
 
-use crate::{
-    inbound::tui::custom_widgets::{
-        connection_list::{ConnectionList, ConnectionListState},
-        keymaps_popup::KeymapsPopup,
-        status_bar::StatusBar,
-    },
-    outbound::wireguard_dbus_repository::WireGuardDBusRepository,
+use crate::inbound::tui::custom_widgets::{
+    connection_list::{ConnectionList, ConnectionListState},
+    keymaps_popup::KeymapsPopup,
+    status_bar::StatusBar,
 };
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use domain::models::WireGuardConnection;
-use ports::outbound::wireguard_port::WireGuardPort;
+use ports::inbound::list_connections_port::ListConnectionsPort;
 use ratatui::{
     Frame,
     buffer::Buffer,
@@ -21,11 +18,15 @@ use ratatui::{
 use std::{env, io};
 use walkdir::WalkDir;
 
-#[derive(Debug, Default)]
-pub struct App {
+#[derive(Debug)]
+pub struct App<L>
+where
+    L: ListConnectionsPort,
+{
     show_help: bool,
     exit: bool,
     connections: Connections,
+    list_connections_port: L,
 }
 
 #[derive(Debug, Default)]
@@ -34,7 +35,18 @@ struct Connections {
     connection_list_state: ConnectionListState,
 }
 
-impl App {
+impl<L> App<L>
+where
+    L: ListConnectionsPort,
+{
+    pub fn new(list_connections_port: L) -> Self {
+        Self {
+            show_help: bool::default(),
+            exit: bool::default(),
+            connections: Connections::default(),
+            list_connections_port,
+        }
+    }
     pub fn run(&mut self) -> io::Result<()> {
         let mut terminal = ratatui::init();
         // Load all the available VPN config files only once at app startup
@@ -52,13 +64,7 @@ impl App {
     /// Load the available VPN connections
     /// and import them to the app state
     fn init_connection_list(&mut self) {
-        // TODO: This is just for testing quickly, move this into correct layer and gracefully
-        // handle error
-        let c = WireGuardDBusRepository::new()
-            .unwrap()
-            .get_imported_connections()
-            .unwrap_or_default();
-        self.connections.value = c;
+        self.connections.value = self.list_connections_port.get();
         if self
             .connections
             .connection_list_state
@@ -160,7 +166,10 @@ impl App {
     }
 }
 
-impl Widget for &mut App {
+impl<L> Widget for &mut App<L>
+where
+    L: ListConnectionsPort,
+{
     fn render(self, area: Rect, buf: &mut Buffer) {
         let main_layout = Layout::default()
             .direction(Direction::Vertical)
