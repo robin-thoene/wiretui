@@ -8,7 +8,9 @@ use crate::inbound::tui::custom_widgets::{
 };
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use domain::models::WireGuardConnection;
-use ports::inbound::list_connections_port::ListConnectionsPort;
+use ports::inbound::{
+    activate_connection_port::ActivateConnectionPort, list_connections_port::ListConnectionsPort,
+};
 use ratatui::{
     Frame,
     buffer::Buffer,
@@ -19,14 +21,16 @@ use std::{env, io};
 use walkdir::WalkDir;
 
 #[derive(Debug)]
-pub struct App<L>
+pub struct App<L, A>
 where
     L: ListConnectionsPort,
+    A: ActivateConnectionPort,
 {
     show_help: bool,
     exit: bool,
     connections: Connections,
     list_connections_port: L,
+    _activate_connection_port: A,
 }
 
 #[derive(Debug, Default)]
@@ -35,16 +39,18 @@ struct Connections {
     connection_list_state: ConnectionListState,
 }
 
-impl<L> App<L>
+impl<L, A> App<L, A>
 where
     L: ListConnectionsPort,
+    A: ActivateConnectionPort,
 {
-    pub fn new(list_connections_port: L) -> Self {
+    pub fn new(list_connections_port: L, activate_connection_port: A) -> Self {
         Self {
             show_help: bool::default(),
             exit: bool::default(),
             connections: Connections::default(),
             list_connections_port,
+            _activate_connection_port: activate_connection_port,
         }
     }
     pub fn run(&mut self) -> io::Result<()> {
@@ -166,9 +172,10 @@ where
     }
 }
 
-impl<L> Widget for &mut App<L>
+impl<L, A> Widget for &mut App<L, A>
 where
     L: ListConnectionsPort,
+    A: ActivateConnectionPort,
 {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let main_layout = Layout::default()

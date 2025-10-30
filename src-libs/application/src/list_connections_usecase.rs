@@ -4,25 +4,25 @@ use ports::{
 };
 
 /// Use case for retrieving all available connections
-pub struct ListConnectionsUseCase<W>
+pub struct ListConnectionsUseCase<'a, W>
 where
     W: WireGuardPort,
 {
-    wireguard_port: W,
+    wireguard_port: &'a W,
 }
 
-impl<W> ListConnectionsUseCase<W>
+impl<'a, W> ListConnectionsUseCase<'a, W>
 where
     W: WireGuardPort,
 {
-    pub fn new(wireguard_dbus_repository: W) -> Self {
+    pub fn new(wireguard_dbus_repository: &'a W) -> Self {
         Self {
             wireguard_port: wireguard_dbus_repository,
         }
     }
 }
 
-impl<W> ListConnectionsPort for ListConnectionsUseCase<W>
+impl<'a, W> ListConnectionsPort for ListConnectionsUseCase<'a, W>
 where
     W: WireGuardPort,
 {
@@ -31,5 +31,82 @@ where
         self.wireguard_port
             .get_imported_connections()
             .unwrap_or_default()
+    }
+}
+
+#[cfg(test)]
+mod list_connections_usecase_tests {
+    use std::error::Error;
+
+    use super::*;
+
+    /// Ensures that the use case returns an empty vec if the WireGuardPort returns an empty one
+    /// as well
+    #[test]
+    fn returns_expected_empty_vec() {
+        // Arrange
+        #[derive(Default)]
+        struct WireGuardDbusRepoMock {}
+        impl WireGuardPort for WireGuardDbusRepoMock {
+            fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, Box<dyn Error>> {
+                Ok(vec![])
+            }
+        }
+        // Act
+        let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
+        // Assert
+        assert_eq!(result, Vec::<WireGuardConnection>::new());
+        assert_eq!(result.len(), 0);
+    }
+
+    /// Ensures that an error on the WireGuardPort results in a fallback to an empty vec
+    #[test]
+    fn fallback_to_empty_vec() {
+        // Arrange
+        #[derive(Default)]
+        struct WireGuardDbusRepoMock {}
+        impl WireGuardPort for WireGuardDbusRepoMock {
+            fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, Box<dyn Error>> {
+                Err("some error".into())
+            }
+        }
+        // Act
+        let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
+        // Assert
+        assert_eq!(result, Vec::<WireGuardConnection>::new());
+        assert_eq!(result.len(), 0);
+    }
+
+    /// Ensures that the items that are retrieved from the WireGuardPort are returned correctly
+    #[test]
+    fn returns_expected_items() {
+        // Arrange
+        #[derive(Default)]
+        struct WireGuardDbusRepoMock {}
+        impl WireGuardPort for WireGuardDbusRepoMock {
+            fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, Box<dyn Error>> {
+                Ok(vec![
+                    WireGuardConnection::new("some-id-0".to_string()),
+                    WireGuardConnection::new("some-id-1".to_string()),
+                    WireGuardConnection::new("some-id-2".to_string()),
+                    WireGuardConnection::new("some-id-3".to_string()),
+                    WireGuardConnection::new("some-id-4".to_string()),
+                    WireGuardConnection::new("some-id-5".to_string()),
+                ])
+            }
+        }
+        let expected_data = vec![
+            WireGuardConnection::new("some-id-0".to_string()),
+            WireGuardConnection::new("some-id-1".to_string()),
+            WireGuardConnection::new("some-id-2".to_string()),
+            WireGuardConnection::new("some-id-3".to_string()),
+            WireGuardConnection::new("some-id-4".to_string()),
+            WireGuardConnection::new("some-id-5".to_string()),
+        ];
+        // Act
+        let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
+        // Assert
+        assert_eq!(result, expected_data);
+        assert_eq!(result.len(), expected_data.len());
     }
 }
