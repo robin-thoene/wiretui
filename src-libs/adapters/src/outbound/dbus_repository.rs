@@ -5,6 +5,20 @@ use zbus::{
     zvariant::{OwnedObjectPath, OwnedValue, Type},
 };
 
+#[proxy(
+    default_service = "org.freedesktop.NetworkManager",
+    default_path = "/org/freedesktop/NetworkManager",
+    interface = "org.freedesktop.NetworkManager"
+)]
+pub trait NetworkManager {
+    fn activate_connection(
+        &self,
+        connection: &OwnedObjectPath,
+        device: &OwnedObjectPath,
+        specific_object: &OwnedObjectPath,
+    ) -> zbus::Result<OwnedObjectPath>;
+}
+
 #[doc = "Used to automatically generated access to NetworkManager settings using zbus"]
 #[proxy(
     default_service = "org.freedesktop.NetworkManager",

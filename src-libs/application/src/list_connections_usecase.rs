@@ -51,6 +51,10 @@ mod list_connections_usecase_tests {
             fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, Box<dyn Error>> {
                 Ok(vec![])
             }
+
+            fn activate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+                Ok(())
+            }
         }
         // Act
         let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
@@ -68,6 +72,10 @@ mod list_connections_usecase_tests {
         impl WireGuardPort for WireGuardDbusRepoMock {
             fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, Box<dyn Error>> {
                 Err("some error".into())
+            }
+
+            fn activate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+                Ok(())
             }
         }
         // Act
@@ -93,6 +101,10 @@ mod list_connections_usecase_tests {
                     WireGuardConnection::new("some-id-4".to_string()),
                     WireGuardConnection::new("some-id-5".to_string()),
                 ])
+            }
+
+            fn activate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+                Ok(())
             }
         }
         let expected_data = vec![

@@ -30,7 +30,7 @@ where
     exit: bool,
     connections: Connections,
     list_connections_port: L,
-    _activate_connection_port: A,
+    activate_connection_port: A,
 }
 
 #[derive(Debug, Default)]
@@ -50,7 +50,7 @@ where
             exit: bool::default(),
             connections: Connections::default(),
             list_connections_port,
-            _activate_connection_port: activate_connection_port,
+            activate_connection_port,
         }
     }
     pub fn run(&mut self) -> io::Result<()> {
@@ -136,6 +136,16 @@ where
                 .connection_list_state
                 .list_state
                 .select_previous(),
+            KeyCode::Char(' ') => {
+                // TODO: better handling of unexpected state and errors
+                let idx = self.connections.connection_list_state.list_state.selected();
+                if let Some(idx) = idx {
+                    let selected = self.connections.value.get(idx);
+                    if let Some(conn) = selected {
+                        let _ = self.activate_connection_port.activate(conn);
+                    }
+                }
+            }
             _ => {}
         }
     }
