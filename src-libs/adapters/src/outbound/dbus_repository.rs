@@ -5,12 +5,16 @@ use zbus::{
     zvariant::{OwnedObjectPath, OwnedValue, Type},
 };
 
+#[doc = "Used to automatically generated access to the NetworkManager using zbus"]
 #[proxy(
     default_service = "org.freedesktop.NetworkManager",
     default_path = "/org/freedesktop/NetworkManager",
     interface = "org.freedesktop.NetworkManager"
 )]
 pub trait NetworkManager {
+    #[zbus(property)]
+    fn active_connections(&self) -> zbus::Result<Vec<OwnedObjectPath>>;
+
     fn activate_connection(
         &self,
         connection: &OwnedObjectPath,
@@ -36,6 +40,16 @@ pub trait NetworkManagerSettings {
 )]
 pub trait NetworkManagerConnection {
     fn get_settings(&self) -> zbus::Result<HashMap<String, HashMap<String, OwnedValue>>>;
+}
+
+#[doc = "Used to automatically generated access to a NetworkManager active connection using zbus"]
+#[proxy(
+    default_service = "org.freedesktop.NetworkManager",
+    interface = "org.freedesktop.NetworkManager.Connection.Active"
+)]
+pub trait NetworkManagerActiveConnection {
+    #[zbus(property)]
+    fn id(&self) -> zbus::Result<String>;
 }
 
 /// Custom model for a single NetworkManager connection

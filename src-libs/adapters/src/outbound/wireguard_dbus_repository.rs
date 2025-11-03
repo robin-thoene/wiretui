@@ -1,5 +1,6 @@
 use crate::outbound::dbus_repository::{
-    NetworkConnection, NetworkManagerConnectionProxyBlocking, NetworkManagerProxyBlocking,
+    NetworkConnection, NetworkManagerActiveConnectionProxyBlocking,
+    NetworkManagerConnectionProxyBlocking, NetworkManagerProxyBlocking,
     NetworkManagerSettingsProxyBlocking,
 };
 use domain::models::WireGuardConnection;
@@ -10,6 +11,7 @@ use zbus::{blocking::Connection, zvariant::OwnedObjectPath};
 struct InternalWireGuardConnection {
     id: String,
     path: OwnedObjectPath,
+    is_active: bool,
 }
 
 impl InternalWireGuardConnection {
@@ -19,13 +21,13 @@ impl InternalWireGuardConnection {
     ///
     /// * `id` - The connection identifier
     /// * `path` - The path on the D-Bus
-    fn new(id: String, path: OwnedObjectPath) -> Self {
-        Self { id, path }
-    }
-
-    /// Get the unique identifier
-    fn get_id(&self) -> &str {
-        &self.id
+    /// * `is_active` - Whether the connection is currently active or not
+    fn new(id: String, path: OwnedObjectPath, is_active: bool) -> Self {
+        Self {
+            id,
+            path,
+            is_active,
+        }
     }
 }
 
@@ -56,8 +58,28 @@ impl WireGuardDBusRepository {
     /// Repository internal method to get the imported D-Bus WireGuard connections
     fn get_imported_connections_internal(&self) -> zbus::Result<Vec<InternalWireGuardConnection>> {
         let settings_proxy = NetworkManagerSettingsProxyBlocking::new(&self.dbus_connection)?;
+        let nm_proxy = NetworkManagerProxyBlocking::new(&self.dbus_connection)?;
         let connections = settings_proxy.list_connections()?;
         let mut res = vec![];
+        let active_connection_ids: Vec<String> = nm_proxy
+            .active_connections()?
+            .iter()
+            .map(|x| {
+                // TODO: this is ugly, refactor
+                let proxy =
+                    NetworkManagerActiveConnectionProxyBlocking::new(&self.dbus_connection, x);
+                if let Ok(proxy) = proxy {
+                    let id = proxy.id();
+                    if let Ok(id) = id {
+                        id
+                    } else {
+                        "default".to_string()
+                    }
+                } else {
+                    "default".to_string()
+                }
+            })
+            .collect();
         for connection in connections {
             let connection_proxy =
                 NetworkManagerConnectionProxyBlocking::new(&self.dbus_connection, &connection)?;
@@ -66,9 +88,11 @@ impl WireGuardDBusRepository {
             if let Ok(conn) = conn
                 && conn.conn_type == "wireguard"
             {
+                let is_active = active_connection_ids.contains(&conn.id);
                 res.push(InternalWireGuardConnection::new(
                     conn.id,
                     connection.clone(),
+                    is_active,
                 ));
             }
         }
@@ -83,14 +107,17 @@ impl WireGuardPort for WireGuardDBusRepository {
         let internal_connections = self.get_imported_connections_internal()?;
         let mut res = vec![];
         for connection in internal_connections {
-            res.push(WireGuardConnection::new(connection.get_id().to_string()));
+            res.push(WireGuardConnection::new(
+                connection.id.to_string(),
+                connection.is_active,
+            ));
         }
         Ok(res)
     }
 
     fn activate_connection(&self, id: &str) -> Result<(), Box<dyn std::error::Error>> {
         let connections = self.get_imported_connections_internal()?;
-        let conn = connections.iter().find(|x| x.get_id() == id);
+        let conn = connections.iter().find(|x| x.id == id);
         if let Some(conn) = conn {
             let r_path =
                 OwnedObjectPath::try_from("/").expect("Expect the root objectpath to be created");

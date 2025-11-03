@@ -94,12 +94,12 @@ mod list_connections_usecase_tests {
         impl WireGuardPort for WireGuardDbusRepoMock {
             fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, Box<dyn Error>> {
                 Ok(vec![
-                    WireGuardConnection::new("some-id-0".to_string()),
-                    WireGuardConnection::new("some-id-1".to_string()),
-                    WireGuardConnection::new("some-id-2".to_string()),
-                    WireGuardConnection::new("some-id-3".to_string()),
-                    WireGuardConnection::new("some-id-4".to_string()),
-                    WireGuardConnection::new("some-id-5".to_string()),
+                    WireGuardConnection::new("some-id-0".to_string(), false),
+                    WireGuardConnection::new("some-id-1".to_string(), false),
+                    WireGuardConnection::new("some-id-2".to_string(), false),
+                    WireGuardConnection::new("some-id-3".to_string(), false),
+                    WireGuardConnection::new("some-id-4".to_string(), false),
+                    WireGuardConnection::new("some-id-5".to_string(), false),
                 ])
             }
 
@@ -108,12 +108,12 @@ mod list_connections_usecase_tests {
             }
         }
         let expected_data = vec![
-            WireGuardConnection::new("some-id-0".to_string()),
-            WireGuardConnection::new("some-id-1".to_string()),
-            WireGuardConnection::new("some-id-2".to_string()),
-            WireGuardConnection::new("some-id-3".to_string()),
-            WireGuardConnection::new("some-id-4".to_string()),
-            WireGuardConnection::new("some-id-5".to_string()),
+            WireGuardConnection::new("some-id-0".to_string(), false),
+            WireGuardConnection::new("some-id-1".to_string(), false),
+            WireGuardConnection::new("some-id-2".to_string(), false),
+            WireGuardConnection::new("some-id-3".to_string(), false),
+            WireGuardConnection::new("some-id-4".to_string(), false),
+            WireGuardConnection::new("some-id-5".to_string(), false),
         ];
         // Act
         let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
