@@ -17,8 +17,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     widgets::{StatefulWidget, Widget},
 };
-use std::{env, io};
-use walkdir::WalkDir;
+use std::io;
 
 #[derive(Debug)]
 pub struct App<L, A>
@@ -142,7 +141,12 @@ where
                 if let Some(idx) = idx {
                     let selected = self.connections.value.get(idx);
                     if let Some(conn) = selected {
+                        // Attempt to activate the selected connection
                         let _ = self.activate_connection_port.activate(conn);
+                        // Refresh the connection list
+                        // TODO: use a more optimal way to mark successful activated conn as active
+                        // in ui
+                        self.connections.value = self.list_connections_port.get();
                     }
                 }
             }
@@ -163,22 +167,6 @@ where
     /// Close the help menu i.e. the keymaps popup
     fn close_help(&mut self) {
         self.show_help = false
-    }
-
-    /// Get the file locations of all available VPN config files
-    /// from the configured directory
-    fn _get_wireguard_config_files(&self) -> Vec<String> {
-        let mut res = vec![];
-        if let Some(mut dir) = env::home_dir() {
-            dir.push("wireguard");
-            let walker = WalkDir::new(dir).min_depth(1).into_iter();
-            for entry in walker.filter_entry(|e| e.file_type().is_file()).flatten() {
-                if let Some(s) = entry.path().to_str() {
-                    res.push(s.to_string());
-                }
-            }
-        }
-        res
     }
 }
 

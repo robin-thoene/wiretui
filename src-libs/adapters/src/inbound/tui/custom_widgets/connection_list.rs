@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use crate::inbound::tui::styles::{HIGHLIGHT_STYLE, SELECTED_STYLE};
 use domain::models::WireGuardConnection;
 use ratatui::{
@@ -45,7 +47,14 @@ impl<'a> StatefulWidget for ConnectionList<'a> {
         let config_values_list_items: Vec<ListItem> = self
             .connections
             .iter()
-            .map(|item| ListItem::from(item.get_id()))
+            .map(|item| {
+                let active_indicator = if item.get_is_active() == &true {
+                    "*"
+                } else {
+                    ""
+                };
+                ListItem::from(format!("{} {}", item.get_id(), active_indicator))
+            })
             .collect();
         let config_values_list = List::new(config_values_list_items)
             .block(config_values_block)
