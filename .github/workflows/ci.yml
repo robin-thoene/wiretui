@@ -12,5 +12,7 @@ jobs:
         run: ./scripts/lint_architecture.sh
       - name: Build
         run: cargo build --release
+      - name: clippy
+        run: cargo clippy
       - name: Test
         run: cargo test
