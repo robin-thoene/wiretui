@@ -28,9 +28,12 @@ where
 {
     fn get(&self) -> Vec<WireGuardConnection> {
         // TODO: error handling
-        self.wireguard_port
+        let mut res = self
+            .wireguard_port
             .get_imported_connections()
-            .unwrap_or_default()
+            .unwrap_or_default();
+        res.sort_by(|a, b| a.get_id().cmp(b.get_id()));
+        res
     }
 }
 
