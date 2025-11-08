@@ -124,4 +124,42 @@ mod list_connections_usecase_tests {
         assert_eq!(result, expected_data);
         assert_eq!(result.len(), expected_data.len());
     }
+
+    /// Ensures that the items that are retrieved from the WireGuardPort are sorted by id before
+    /// being returned
+    #[test]
+    fn returns_items_sorted() {
+        // Arrange
+        #[derive(Default)]
+        struct WireGuardDbusRepoMock {}
+        impl WireGuardPort for WireGuardDbusRepoMock {
+            fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, Box<dyn Error>> {
+                Ok(vec![
+                    WireGuardConnection::new("some-id-0".to_string(), false),
+                    WireGuardConnection::new("some-id-3".to_string(), false),
+                    WireGuardConnection::new("some-id-1".to_string(), false),
+                    WireGuardConnection::new("some-id-5".to_string(), false),
+                    WireGuardConnection::new("some-id-4".to_string(), false),
+                    WireGuardConnection::new("some-id-2".to_string(), false),
+                ])
+            }
+
+            fn activate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+                Ok(())
+            }
+        }
+        let expected_data = vec![
+            WireGuardConnection::new("some-id-0".to_string(), false),
+            WireGuardConnection::new("some-id-1".to_string(), false),
+            WireGuardConnection::new("some-id-2".to_string(), false),
+            WireGuardConnection::new("some-id-3".to_string(), false),
+            WireGuardConnection::new("some-id-4".to_string(), false),
+            WireGuardConnection::new("some-id-5".to_string(), false),
+        ];
+        // Act
+        let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
+        // Assert
+        assert_eq!(result, expected_data);
+        assert_eq!(result.len(), expected_data.len());
+    }
 }
