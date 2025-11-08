@@ -39,9 +39,8 @@ where
 
 #[cfg(test)]
 mod list_connections_usecase_tests {
-    use std::error::Error;
-
     use super::*;
+    use std::error::Error;
 
     /// Ensures that the use case returns an empty vec if the WireGuardPort returns an empty one
     /// as well
