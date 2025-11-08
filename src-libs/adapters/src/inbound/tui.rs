@@ -9,7 +9,9 @@ use crate::inbound::tui::custom_widgets::{
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use domain::models::WireGuardConnection;
 use ports::inbound::{
-    activate_connection_port::ActivateConnectionPort, list_connections_port::ListConnectionsPort,
+    activate_connection_port::ActivateConnectionPort,
+    deactivate_connection_port::DeactivateConnectionPort,
+    list_connections_port::ListConnectionsPort,
 };
 use ratatui::{
     Frame,
@@ -20,16 +22,18 @@ use ratatui::{
 use std::io;
 
 #[derive(Debug)]
-pub struct App<L, A>
+pub struct App<L, A, D>
 where
     L: ListConnectionsPort,
     A: ActivateConnectionPort,
+    D: DeactivateConnectionPort,
 {
     show_help: bool,
     exit: bool,
     connections: Connections,
     list_connections_port: L,
     activate_connection_port: A,
+    deactivate_connection_port: D,
 }
 
 #[derive(Debug, Default)]
@@ -38,18 +42,24 @@ struct Connections {
     connection_list_state: ConnectionListState,
 }
 
-impl<L, A> App<L, A>
+impl<L, A, D> App<L, A, D>
 where
     L: ListConnectionsPort,
     A: ActivateConnectionPort,
+    D: DeactivateConnectionPort,
 {
-    pub fn new(list_connections_port: L, activate_connection_port: A) -> Self {
+    pub fn new(
+        list_connections_port: L,
+        activate_connection_port: A,
+        deactivate_connection_port: D,
+    ) -> Self {
         Self {
             show_help: bool::default(),
             exit: bool::default(),
             connections: Connections::default(),
             list_connections_port,
             activate_connection_port,
+            deactivate_connection_port,
         }
     }
     pub fn run(&mut self) -> io::Result<()> {
@@ -135,21 +145,7 @@ where
                 .connection_list_state
                 .list_state
                 .select_previous(),
-            KeyCode::Char(' ') => {
-                // TODO: better handling of unexpected state and errors
-                let idx = self.connections.connection_list_state.list_state.selected();
-                if let Some(idx) = idx {
-                    let selected = self.connections.value.get(idx);
-                    if let Some(conn) = selected {
-                        // Attempt to activate the selected connection
-                        let _ = self.activate_connection_port.activate(conn);
-                        // Refresh the connection list
-                        // TODO: use a more optimal way to mark successful activated conn as active
-                        // in ui
-                        self.connections.value = self.list_connections_port.get();
-                    }
-                }
-            }
+            KeyCode::Char(' ') => self.toggle_selected_connection(),
             _ => {}
         }
     }
@@ -168,12 +164,35 @@ where
     fn close_help(&mut self) {
         self.show_help = false
     }
+
+    /// Toggles the selected connection. If it is active, deactivate it and vice versa
+    fn toggle_selected_connection(&mut self) {
+        // TODO: better handling of unexpected state and errors
+        let idx = self.connections.connection_list_state.list_state.selected();
+        if let Some(idx) = idx {
+            let selected = self.connections.value.get(idx);
+            if let Some(conn) = selected {
+                if conn.get_is_active() == &true {
+                    // Attempt to deactivate the selected connection if it is already active
+                    let _ = self.deactivate_connection_port.deactivate(conn);
+                } else {
+                    // Attempt to activate the selected connection if it is not yet active
+                    let _ = self.activate_connection_port.activate(conn);
+                }
+                // Refresh the connection list
+                // TODO: use a more optimal way to mark successful activated conn as active
+                // in ui
+                self.connections.value = self.list_connections_port.get();
+            }
+        }
+    }
 }
 
-impl<L, A> Widget for &mut App<L, A>
+impl<L, A, D> Widget for &mut App<L, A, D>
 where
     L: ListConnectionsPort,
     A: ActivateConnectionPort,
+    D: DeactivateConnectionPort,
 {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let main_layout = Layout::default()

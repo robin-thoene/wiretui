@@ -57,6 +57,10 @@ mod list_connections_usecase_tests {
             fn activate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
                 Ok(())
             }
+
+            fn deactivate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+                Ok(())
+            }
         }
         // Act
         let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
@@ -77,6 +81,10 @@ mod list_connections_usecase_tests {
             }
 
             fn activate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+                Ok(())
+            }
+
+            fn deactivate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
                 Ok(())
             }
         }
@@ -106,6 +114,10 @@ mod list_connections_usecase_tests {
             }
 
             fn activate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+                Ok(())
+            }
+
+            fn deactivate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
                 Ok(())
             }
         }
@@ -144,6 +156,10 @@ mod list_connections_usecase_tests {
             }
 
             fn activate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+                Ok(())
+            }
+
+            fn deactivate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
                 Ok(())
             }
         }

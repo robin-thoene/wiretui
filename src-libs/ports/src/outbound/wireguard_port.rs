@@ -7,5 +7,16 @@ pub trait WireGuardPort {
     fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, Box<dyn Error>>;
 
     /// Activate a single connection
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The connection identifier
     fn activate_connection(&self, id: &str) -> Result<(), Box<dyn Error>>;
+
+    /// Deactivate a single connection
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The connection identifier
+    fn deactivate_connection(&self, id: &str) -> Result<(), Box<dyn Error>>;
 }

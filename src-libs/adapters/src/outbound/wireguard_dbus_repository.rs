@@ -119,6 +119,9 @@ impl WireGuardPort for WireGuardDBusRepository {
         let connections = self.get_imported_connections_internal()?;
         let conn = connections.iter().find(|x| x.id == id);
         if let Some(conn) = conn {
+            if conn.is_active {
+                return Err("Can not activate a connection that is already active".into());
+            }
             let r_path =
                 OwnedObjectPath::try_from("/").expect("Expect the root objectpath to be created");
             let nm_proxy = NetworkManagerProxyBlocking::new(&self.dbus_connection)?;
@@ -129,6 +132,34 @@ impl WireGuardPort for WireGuardDBusRepository {
             }
         } else {
             Err("could not find connection".into())
+        }
+    }
+
+    fn deactivate_connection(&self, id: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let nm_proxy = NetworkManagerProxyBlocking::new(&self.dbus_connection)?;
+        let active_connections = nm_proxy.active_connections()?;
+        // TODO: this is ugly, refactor
+        let mut active_connection_path: Option<OwnedObjectPath> = None;
+        for ac in active_connections {
+            let proxy =
+                NetworkManagerActiveConnectionProxyBlocking::new(&self.dbus_connection, ac.clone());
+            if let Ok(proxy) = proxy {
+                let a_id = proxy.id();
+                if let Ok(a_id) = a_id
+                    && a_id == id
+                {
+                    active_connection_path = Some(ac);
+                }
+            }
+        }
+        if let Some(conn_path) = active_connection_path {
+            let result = nm_proxy.deactivate_connection(&conn_path);
+            match result {
+                Ok(_ok) => Ok(()),
+                Err(_err) => Err("Could not deactivate connection".into()),
+            }
+        } else {
+            Err("Could not find active connection for provided id".into())
         }
     }
 }

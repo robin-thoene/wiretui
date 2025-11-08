@@ -5,7 +5,7 @@ use ports::{
 };
 use std::error::Error;
 
-/// Use case for activating an available connections
+/// Use case for activating an available connection
 pub struct ActivateConnectionUsecase<'a, W>
 where
     W: WireGuardPort,

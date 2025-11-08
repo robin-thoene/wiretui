@@ -1,13 +1,13 @@
 use domain::models::WireGuardConnection;
 use std::error::Error;
 
-/// Defines the inbound port to activate an available connections
+/// Defines the inbound port to activate an available connection
 pub trait ActivateConnectionPort {
-    /// Activate an available WireGuard connections
+    /// Activate an available WireGuard connection
     ///
     /// # Arguments
     ///
-    /// * `id` - The identifier of the connection to activate
+    /// * `connection` - The connection to activate
     ///
     /// # Errors
     ///
