@@ -189,7 +189,7 @@ mod network_connection_tests {
         }
     }
 
-    /// Validates that a missing 'id' in the D-Bus response results in the expected error type
+    /// Validates that a missing 'type' in the D-Bus response results in the expected error type
     #[test]
     fn returns_correct_error_missing_type_in_connection() {
         // Arrange
