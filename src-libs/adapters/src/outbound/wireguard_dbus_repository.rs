@@ -7,7 +7,7 @@ use domain::models::WireGuardConnection;
 use ports::outbound::wireguard_port::WireGuardPort;
 use zbus::{blocking::Connection, zvariant::OwnedObjectPath};
 
-/// Repository internal representation of a single WireGuard connection
+/// Internal representation of a single WireGuard connection
 struct InternalWireGuardConnection {
     id: String,
     path: OwnedObjectPath,
@@ -33,6 +33,7 @@ impl InternalWireGuardConnection {
 
 /// Repository that handles WireGuard using D-Bus
 pub struct WireGuardDBusRepository {
+    /// The system connection to the D-Bus on the operating system
     dbus_connection: Connection,
 }
 
@@ -55,7 +56,7 @@ impl WireGuardDBusRepository {
         Ok(Self { dbus_connection })
     }
 
-    /// Repository internal method to get the imported D-Bus WireGuard connections
+    /// Internal function to get the imported D-Bus WireGuard connections
     fn get_imported_connections_internal(&self) -> zbus::Result<Vec<InternalWireGuardConnection>> {
         let settings_proxy = NetworkManagerSettingsProxyBlocking::new(&self.dbus_connection)?;
         let nm_proxy = NetworkManagerProxyBlocking::new(&self.dbus_connection)?;
