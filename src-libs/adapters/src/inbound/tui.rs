@@ -62,11 +62,10 @@ where
             deactivate_connection_port,
         }
     }
+
     pub fn run(&mut self) -> io::Result<()> {
         let mut terminal = ratatui::init();
-        // Load all the available VPN config files only once at app startup
         self.init_connection_list();
-        // Main loop
         while !self.exit {
             terminal.draw(|frame| self.draw(frame))?;
             self.handle_events()?;
