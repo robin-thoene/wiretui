@@ -15,10 +15,8 @@ impl<'a, W> ListConnectionsUseCase<'a, W>
 where
     W: WireGuardPort,
 {
-    pub fn new(wireguard_dbus_repository: &'a W) -> Self {
-        Self {
-            wireguard_port: wireguard_dbus_repository,
-        }
+    pub fn new(wireguard_port: &'a W) -> Self {
+        Self { wireguard_port }
     }
 }
 
