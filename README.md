@@ -2,7 +2,16 @@
 
 ## Summary
 
-A minimal keyboard-driven TUI to manage WireGuard VPN connections
+A minimal keyboard-driven TUI to manage WireGuard VPN connections, heavily inspired by
+[bluetui](https://github.com/pythops/bluetui) and [impala](https://github.com/pythops/impala).
+
+## ⚠️Warning
+
+This project is currently in development and is not yet stable nor meant to be used.
+
+## Prerequisites
+
+You will need to use a Linux based operating system with the **networkmanager**.
 
 ## Local development
 
