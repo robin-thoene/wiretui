@@ -13,6 +13,5 @@ domain = { path = "../domain" }
 ports = { path = "../ports" }
 crossterm = "0.29.0"
 ratatui = "0.29.0"
-walkdir = "2.5.0"
 zbus = "5.12.0"
 serde = "1.0.228"
