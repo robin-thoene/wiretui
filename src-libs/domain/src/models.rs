@@ -1,4 +1,4 @@
-/// Represents a single VPN connection
+/// Represents a single WireGuard VPN connection
 #[derive(Debug, PartialEq)]
 pub struct WireGuardConnection {
     /// The identifier of the connection
@@ -44,8 +44,7 @@ impl WireGuardConnection {
         &self.id
     }
 
-    /// Retrieves the internal state of the connection, i.e. Whether it is
-    /// currently active or not
+    /// Retrieves the internal state of the connection (whether it is currently active or not)
     ///
     /// # Examples
     ///
