@@ -1,40 +1,32 @@
-# hexa-rs
-
-![icon](./assets/hexa-rs-icon.png)
-
-DISCLAIMER: This image is AI generated. If you have design skills and want to contribute, a human
-created image is very much welcome.
+# wiretui
 
 ## Summary
 
-This template initializes a new Rust project following the hexagonal architecture principals,
-agnostic about what kind of application you want to develop. After the use of this template, be
-sure to address the `# TODO` that are left across the code base.
+A minimal keyboard-driven TUI to manage WireGuard VPN connections, heavily inspired by
+[bluetui](https://github.com/pythops/bluetui) and [impala](https://github.com/pythops/impala).
+
+## ⚠️Warning
+
+This project is currently in development and is not yet stable nor meant to be used.
+
+## Prerequisites
+
+You will need to use a Linux based operating system with the **networkmanager**.
 
 ## Local development
+
+### CLI
 
 Run the application
 
 ```shell
-cargo run
-```
-
-Run the application with hot reloading (using [watchexec](https://github.com/watchexec/watchexec))
-
-```shell
-watchexec -r -- cargo run
+cargo run --bin wiretui-bin
 ```
 
 Run the tests
 
 ```shell
 cargo test
-```
-
-Run the tests with hot reloading (using [watchexec](https://github.com/watchexec/watchexec))
-
-```shell
-watchexec -r -- cargo test
 ```
 
 Check if you violated the hexagonal architecture dependency rules
@@ -48,3 +40,8 @@ Check the workspace rules (using [cargo-deny](https://github.com/EmbarkStudios/c
 ```shell
 cargo deny check
 ```
+
+### Debugging
+
+This project contains a debugger configuration using [.vscode files](./.vscode/). Those can be
+used in Neovim as well (see example [here](https://github.com/robin-thoene/dotfiles/blob/f388381f49d4b79e2755e18929d2462d198bd30d/.config/nvim/lua/plugins/nvim_dap.lua#L98)).

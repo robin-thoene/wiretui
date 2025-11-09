@@ -7,10 +7,12 @@ no-default-features = false
 feature-depth = 1
 
 [advisories]
-ignore = []
+ignore = [
+  "RUSTSEC-2024-0436", # TODO: remove after `ratatui` does not use `paste` anymore
+]
 
 [licenses]
-allow = ["MIT"]
+allow = ["MIT", "Unicode-3.0", "Zlib", "Apache-2.0"]
 confidence-threshold = 0.8
 exceptions = []
 
@@ -19,7 +21,7 @@ ignore = false
 registries = []
 
 [bans]
-multiple-versions = "deny"
+multiple-versions = "allow"
 wildcards = "deny"
 allow-wildcard-paths = true
 highlight = "all"

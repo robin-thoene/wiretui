@@ -8,9 +8,13 @@ jobs:
         uses: actions/checkout@v4
       - name: Check workspace
         uses: EmbarkStudios/cargo-deny-action@v2
-      - name: Check architecture
-        run: ./scripts/lint_architecture.sh
       - name: Build
         run: cargo build --release
+      - name: clippy
+        run: cargo clippy
       - name: Test
         run: cargo test
+      - name: Documentation
+        run: cargo doc --no-deps
+      - name: Check architecture
+        run: ./scripts/lint_architecture.sh
