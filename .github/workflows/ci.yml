@@ -16,3 +16,5 @@ jobs:
         run: cargo clippy
       - name: Test
         run: cargo test
+      - name: Documentation
+        run: cargo doc --no-deps
