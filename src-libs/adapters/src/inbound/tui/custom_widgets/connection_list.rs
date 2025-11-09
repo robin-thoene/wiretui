@@ -10,7 +10,6 @@ use ratatui::{
 use std::fmt::Debug;
 
 /// Interactive list of available connections
-/// Can be used to activate/deactivate VPN connections
 pub struct ConnectionList<'a> {
     pub highlight: bool,
     pub connections: &'a Vec<WireGuardConnection>,
