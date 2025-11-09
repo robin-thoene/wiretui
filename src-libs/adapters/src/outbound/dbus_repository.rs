@@ -5,7 +5,7 @@ use zbus::{
     zvariant::{OwnedObjectPath, OwnedValue, Type},
 };
 
-#[doc = "Used to automatically generated access to the NetworkManager using zbus"]
+#[doc = "Used to automatically generate access to the NetworkManager using zbus"]
 #[proxy(
     default_service = "org.freedesktop.NetworkManager",
     default_path = "/org/freedesktop/NetworkManager",
@@ -28,7 +28,7 @@ pub trait NetworkManager {
     ) -> zbus::Result<OwnedObjectPath>;
 }
 
-#[doc = "Used to automatically generated access to NetworkManager settings using zbus"]
+#[doc = "Used to automatically generate access to NetworkManager settings using zbus"]
 #[proxy(
     default_service = "org.freedesktop.NetworkManager",
     default_path = "/org/freedesktop/NetworkManager/Settings",
@@ -38,7 +38,7 @@ pub trait NetworkManagerSettings {
     fn list_connections(&self) -> zbus::Result<Vec<OwnedObjectPath>>;
 }
 
-#[doc = "Used to automatically generated access to a NetworkManager connection using zbus"]
+#[doc = "Used to automatically generate access to a NetworkManager connection using zbus"]
 #[proxy(
     default_service = "org.freedesktop.NetworkManager",
     interface = "org.freedesktop.NetworkManager.Settings.Connection"
@@ -47,7 +47,7 @@ pub trait NetworkManagerConnection {
     fn get_settings(&self) -> zbus::Result<HashMap<String, HashMap<String, OwnedValue>>>;
 }
 
-#[doc = "Used to automatically generated access to a NetworkManager active connection using zbus"]
+#[doc = "Used to automatically generate access to a NetworkManager active connection using zbus"]
 #[proxy(
     default_service = "org.freedesktop.NetworkManager",
     interface = "org.freedesktop.NetworkManager.Connection.Active"
