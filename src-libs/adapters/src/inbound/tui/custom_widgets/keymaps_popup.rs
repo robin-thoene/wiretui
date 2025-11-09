@@ -15,10 +15,11 @@ impl Widget for KeymapsPopup {
     {
         let area = popup_area(area);
         let keymaps = vec![
-            Line::from(" ?          Open this help menu"),
-            Line::from("ESC         Close popup"),
-            Line::from(" j          Scroll up"),
-            Line::from(" k          Scroll up"),
+            Line::from("  ?          Open this help menu"),
+            Line::from(" ESC         Close popup"),
+            Line::from("  j          Scroll up"),
+            Line::from("  k          Scroll up"),
+            Line::from("SPACE        Toggle connection"),
         ];
         let help_popup_content = Paragraph::new(keymaps).block(
             Block::bordered()
