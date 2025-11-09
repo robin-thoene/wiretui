@@ -1,5 +1,3 @@
-use std::fmt::Debug;
-
 use crate::inbound::tui::styles::{HIGHLIGHT_STYLE, SELECTED_STYLE};
 use domain::models::WireGuardConnection;
 use ratatui::{
@@ -9,6 +7,7 @@ use ratatui::{
         Block, BorderType, Borders, HighlightSpacing, List, ListItem, ListState, StatefulWidget,
     },
 };
+use std::fmt::Debug;
 
 /// Interactive list of available connections
 /// Can be used to activate/deactivate VPN connections
