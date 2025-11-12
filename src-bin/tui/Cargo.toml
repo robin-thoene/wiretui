@@ -10,3 +10,5 @@ license.workspace = true
 [dependencies]
 adapters = { path = "../../src-libs/adapters" }
 application = { path = "../../src-libs/application" }
+env_logger = { workspace = true }
+log = { workspace = true }

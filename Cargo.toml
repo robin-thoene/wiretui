@@ -6,3 +6,11 @@ members = ["src-libs/*", "src-bin/*"]
 version = "0.0.0"
 authors = ["robin-thoene"]
 license = "MIT"
+
+[workspace.dependencies]
+env_logger = "0.11.8"
+log = "0.4.28"
+crossterm = "0.29.0"
+ratatui = "0.29.0"
+zbus = "5.12.0"
+serde = "1.0.228"
