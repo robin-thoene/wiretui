@@ -22,10 +22,7 @@ pub trait NetworkManager {
         specific_object: &OwnedObjectPath,
     ) -> zbus::Result<OwnedObjectPath>;
 
-    fn deactivate_connection(
-        &self,
-        active_connection: &OwnedObjectPath,
-    ) -> zbus::Result<OwnedObjectPath>;
+    fn deactivate_connection(&self, active_connection: &OwnedObjectPath) -> zbus::Result<()>;
 }
 
 #[doc = "Used to automatically generate access to NetworkManager settings using zbus"]

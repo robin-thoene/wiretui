@@ -45,3 +45,23 @@ cargo deny check
 
 This project contains a debugger configuration using [.vscode files](./.vscode/). Those can be
 used in Neovim as well (see example [here](https://github.com/robin-thoene/dotfiles/blob/f388381f49d4b79e2755e18929d2462d198bd30d/.config/nvim/lua/plugins/nvim_dap.lua#L98)).
+
+## Logging
+
+This application uses the **log** crate in combination with the **env_logger** crate to set the
+log level. By default the logs are written to a file, which is overridden every time you run the
+application.
+
+You can see it's current content with
+
+```shell
+cat ~/.local/state/wiretui/log.txt
+```
+
+To override the log level when running the application use
+
+```shell
+RUST_LOG=debug cargo run
+```
+
+Valid log level are `trace`, `debug`, `info`, `warn` and `error`.

@@ -35,7 +35,14 @@ where
                     .deactivate_connection(connection.get_id());
                 match deactivation_result {
                     Ok(()) => Ok(()),
-                    Err(err) => Err(err),
+                    Err(err) => {
+                        log::error!(
+                            "error occurred while attempting to deactivate connection {}: {}",
+                            connection.get_id(),
+                            err
+                        );
+                        Err(err)
+                    }
                 }
             }
         }
