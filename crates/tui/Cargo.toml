@@ -12,7 +12,7 @@ name = "wiretui"
 path = "src/main.rs"
 
 [dependencies]
-adapters = { path = "../../src-libs/adapters" }
-application = { path = "../../src-libs/application" }
+adapters = { path = "../adapters" }
+application = { path = "../application" }
 env_logger = { workspace = true }
 log = { workspace = true }

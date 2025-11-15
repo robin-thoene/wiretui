@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["src-libs/*", "src-bin/*"]
+members = ["crates/*"]
 
 [workspace.package]
 version = "0.0.0"
