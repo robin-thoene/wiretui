@@ -37,7 +37,7 @@ where
                     Ok(()) => Ok(()),
                     Err(err) => {
                         log::error!(
-                            "Error occurred while attempting to deactivate connection {}: {}",
+                            "error occurred while attempting to deactivate connection {}: {}",
                             connection.get_id(),
                             err
                         );

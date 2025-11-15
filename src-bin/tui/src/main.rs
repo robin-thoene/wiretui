@@ -14,21 +14,22 @@ fn main() -> io::Result<()> {
     Builder::from_env(env)
         .target(Target::Pipe(Box::new(log_file)))
         .init();
-    log::debug!("Configured logger");
+    log::debug!("configured logger");
     // Build the dependencies
-    let wireguard_dbus_adapter = WireGuardDBusRepository::new().expect("TODO: fix later");
+    let wireguard_dbus_adapter =
+        WireGuardDBusRepository::new().expect("could not connect to D-Bus");
     let list_connections_usecase = ListConnectionsUseCase::new(&wireguard_dbus_adapter);
     let activate_connection_usecase = ActivateConnectionUsecase::new(&wireguard_dbus_adapter);
     let deactivate_connection_usecase = DeactivateConnectionUsecase::new(&wireguard_dbus_adapter);
-    log::debug!("Buit the dependencies");
+    log::debug!("buit the dependencies");
     // Build and run the TUI application
     let mut tui_app = App::new(
         list_connections_usecase,
         activate_connection_usecase,
         deactivate_connection_usecase,
     );
-    log::debug!("Created the TUI application");
-    log::info!("Starting TUI application ...");
+    log::debug!("created the TUI application");
+    log::info!("running TUI application ...");
     let result = tui_app.run();
     log::info!("TUI application stopped");
     result

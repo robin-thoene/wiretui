@@ -40,7 +40,7 @@ where
                     Ok(()) => Ok(()),
                     Err(err) => {
                         log::error!(
-                            "Error occurred while attempting to activate connection {}: {}",
+                            "error occurred while attempting to activate connection {}: {}",
                             connection.get_id(),
                             err
                         );
