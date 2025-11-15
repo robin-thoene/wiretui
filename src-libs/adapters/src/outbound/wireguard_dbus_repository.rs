@@ -131,10 +131,15 @@ impl WireGuardPort for WireGuardDBusRepository {
             let result = nm_proxy.activate_connection(&conn.path, &r_path, &r_path);
             match result {
                 Ok(_ok) => Ok(()),
-                Err(_err) => Err("Could not activate connection".into()),
+                Err(err) => {
+                    log::error!("Could not activate connection {} using D-Bus: {}", id, err);
+                    Err("Could not activate connection".into())
+                }
             }
         } else {
-            Err("could not find connection".into())
+            let msg = "could not find connection";
+            log::warn!("{}", msg);
+            Err(msg.into())
         }
     }
 
@@ -159,10 +164,19 @@ impl WireGuardPort for WireGuardDBusRepository {
             let result = nm_proxy.deactivate_connection(&conn_path);
             match result {
                 Ok(_ok) => Ok(()),
-                Err(_err) => Err("Could not deactivate connection".into()),
+                Err(err) => {
+                    log::error!(
+                        "Could not deactivate connection {} using D-Bus: {}",
+                        id,
+                        err
+                    );
+                    Err("Could not deactivate connection".into())
+                }
             }
         } else {
-            Err("Could not find active connection for provided id".into())
+            let msg = "Could not find active connection for provided id";
+            log::warn!("{}", msg);
+            Err(msg.into())
         }
     }
 }

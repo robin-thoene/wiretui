@@ -28,13 +28,24 @@ where
 {
     fn activate(&self, connection: &WireGuardConnection) -> Result<(), Box<dyn Error>> {
         match connection.get_is_active() {
-            true => Err("connection is already active".into()),
+            true => {
+                let msg = "connection is already active";
+                log::warn!("{}", msg);
+                Err(msg.into())
+            }
             false => {
                 let activation_result =
                     self.wireguard_port.activate_connection(connection.get_id());
                 match activation_result {
                     Ok(()) => Ok(()),
-                    Err(err) => Err(err),
+                    Err(err) => {
+                        log::error!(
+                            "Error occurred while attempting to activate connection {}: {}",
+                            connection.get_id(),
+                            err
+                        );
+                        Err(err)
+                    }
                 }
             }
         }

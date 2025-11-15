@@ -86,6 +86,7 @@ name = "application"
 version = "0.0.0"
 dependencies = [
  "domain",
+ "log",
  "ports",
 ]
 

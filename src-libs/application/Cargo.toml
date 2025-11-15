@@ -10,3 +10,4 @@ license.workspace = true
 [dependencies]
 domain = { path = "../domain" }
 ports = { path = "../ports" }
+log = { workspace = true }
