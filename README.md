@@ -48,8 +48,9 @@ used in Neovim as well (see example [here](https://github.com/robin-thoene/dotfi
 
 ## Logging
 
-This application uses the **log** create in combination with **env_logger** to set the log level.
-By default the logs are written to a file, which is overridden every time you run the application.
+This application uses the **log** crate in combination with the **env_logger** crate to set the
+log level. By default the logs are written to a file, which is overridden every time you run the
+application.
 
 You can see it's current content with
 
