@@ -5,12 +5,19 @@ use application::{
     list_connections_usecase::ListConnectionsUseCase,
 };
 use env_logger::{Builder, Env, Target};
-use std::{fs::File, io};
+use std::{
+    env,
+    fs::{self, File},
+    io,
+};
 
 fn main() -> io::Result<()> {
     // Setup the logger
-    let log_file = File::create("wiretui_log.txt")?; // TODO: put this into the correct dir
-    let env = Env::default().filter_or("RUST_LOG", "warn");
+    let home = env::var("HOME").expect("expect a home env to be set");
+    let local_state_path = format!("{}/.local/state/wiretui", home);
+    fs::create_dir_all(&local_state_path)?;
+    let log_file = File::create(format!("{}/log.txt", &local_state_path))?;
+    let env = Env::default().filter_or("RUST_LOG", "info");
     Builder::from_env(env)
         .target(Target::Pipe(Box::new(log_file)))
         .init();
