@@ -9,6 +9,7 @@ dependencies = [
  "application",
  "crossterm 0.29.0",
  "domain",
+ "log",
  "ports",
  "ratatui",
  "serde",

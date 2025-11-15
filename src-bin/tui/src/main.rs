@@ -4,13 +4,16 @@ use application::{
     deactivate_connection_usecase::DeactivateConnectionUsecase,
     list_connections_usecase::ListConnectionsUseCase,
 };
-use env_logger::Env;
-use std::io;
+use env_logger::{Builder, Env, Target};
+use std::{fs::File, io};
 
 fn main() -> io::Result<()> {
     // Setup the logger
-    let env = Env::default().filter_or("RUST_LOG", "info");
-    env_logger::init_from_env(env);
+    let log_file = File::create("wiretui_log.txt")?; // TODO: put this into the correct dir
+    let env = Env::default().filter_or("RUST_LOG", "warn");
+    Builder::from_env(env)
+        .target(Target::Pipe(Box::new(log_file)))
+        .init();
     log::debug!("Configured logger");
     // Build the dependencies
     let wireguard_dbus_adapter = WireGuardDBusRepository::new().expect("TODO: fix later");

@@ -121,7 +121,9 @@ impl WireGuardPort for WireGuardDBusRepository {
         let conn = connections.iter().find(|x| x.id == id);
         if let Some(conn) = conn {
             if conn.is_active {
-                return Err("Can not activate a connection that is already active".into());
+                let msg = "Can not activate a connection that is already active";
+                log::warn!("{}", msg);
+                return Err(msg.into());
             }
             let r_path =
                 OwnedObjectPath::try_from("/").expect("Expect the root objectpath to be created");
