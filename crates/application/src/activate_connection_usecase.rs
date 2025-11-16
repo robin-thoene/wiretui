@@ -44,7 +44,8 @@ where
                             connection.get_id(),
                             err
                         );
-                        Err(err)
+                        // TODO: handle specific error
+                        Err("TODO".into())
                     }
                 }
             }

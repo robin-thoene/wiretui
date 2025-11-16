@@ -38,7 +38,10 @@ where
 #[cfg(test)]
 mod list_connections_usecase_tests {
     use super::*;
-    use std::error::Error;
+    use ports::outbound::wireguard_port::{
+        ConnectionActivationError, ConnectionDeactivationError, GetConnectionsError,
+        InfrastructureError,
+    };
 
     /// Ensures that the use case returns an empty vec if the WireGuardPort returns an empty one
     /// as well
@@ -48,15 +51,17 @@ mod list_connections_usecase_tests {
         #[derive(Default)]
         struct WireGuardDbusRepoMock {}
         impl WireGuardPort for WireGuardDbusRepoMock {
-            fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, Box<dyn Error>> {
+            fn get_imported_connections(
+                &self,
+            ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
                 Ok(vec![])
             }
 
-            fn activate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+            fn activate_connection(&self, _id: &str) -> Result<(), ConnectionActivationError> {
                 Ok(())
             }
 
-            fn deactivate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+            fn deactivate_connection(&self, _id: &str) -> Result<(), ConnectionDeactivationError> {
                 Ok(())
             }
         }
@@ -74,15 +79,17 @@ mod list_connections_usecase_tests {
         #[derive(Default)]
         struct WireGuardDbusRepoMock {}
         impl WireGuardPort for WireGuardDbusRepoMock {
-            fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, Box<dyn Error>> {
-                Err("some error".into())
+            fn get_imported_connections(
+                &self,
+            ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
+                Err(GetConnectionsError::Infrastructure(InfrastructureError))
             }
 
-            fn activate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+            fn activate_connection(&self, _id: &str) -> Result<(), ConnectionActivationError> {
                 Ok(())
             }
 
-            fn deactivate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+            fn deactivate_connection(&self, _id: &str) -> Result<(), ConnectionDeactivationError> {
                 Ok(())
             }
         }
@@ -100,7 +107,9 @@ mod list_connections_usecase_tests {
         #[derive(Default)]
         struct WireGuardDbusRepoMock {}
         impl WireGuardPort for WireGuardDbusRepoMock {
-            fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, Box<dyn Error>> {
+            fn get_imported_connections(
+                &self,
+            ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
                 Ok(vec![
                     WireGuardConnection::new("some-id-0".to_string(), false),
                     WireGuardConnection::new("some-id-1".to_string(), false),
@@ -111,11 +120,11 @@ mod list_connections_usecase_tests {
                 ])
             }
 
-            fn activate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+            fn activate_connection(&self, _id: &str) -> Result<(), ConnectionActivationError> {
                 Ok(())
             }
 
-            fn deactivate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+            fn deactivate_connection(&self, _id: &str) -> Result<(), ConnectionDeactivationError> {
                 Ok(())
             }
         }
@@ -142,7 +151,9 @@ mod list_connections_usecase_tests {
         #[derive(Default)]
         struct WireGuardDbusRepoMock {}
         impl WireGuardPort for WireGuardDbusRepoMock {
-            fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, Box<dyn Error>> {
+            fn get_imported_connections(
+                &self,
+            ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
                 Ok(vec![
                     WireGuardConnection::new("some-id-0".to_string(), false),
                     WireGuardConnection::new("some-id-3".to_string(), false),
@@ -153,11 +164,11 @@ mod list_connections_usecase_tests {
                 ])
             }
 
-            fn activate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+            fn activate_connection(&self, _id: &str) -> Result<(), ConnectionActivationError> {
                 Ok(())
             }
 
-            fn deactivate_connection(&self, _id: &str) -> Result<(), Box<dyn Error>> {
+            fn deactivate_connection(&self, _id: &str) -> Result<(), ConnectionDeactivationError> {
                 Ok(())
             }
         }
