@@ -1,5 +1,4 @@
 use domain::models::WireGuardConnection;
-use std::error::Error;
 
 /// Defines the inbound port to activate an available connection
 pub trait ActivateConnectionPort {
@@ -12,5 +11,11 @@ pub trait ActivateConnectionPort {
     /// # Errors
     ///
     /// TODO: describe error
-    fn activate(&self, connection: &WireGuardConnection) -> Result<(), Box<dyn Error>>;
+    fn activate(&self, connection: &WireGuardConnection) -> Result<(), ConnectionActivationError>;
+}
+
+pub enum ConnectionActivationError {
+    Infra,
+    AlreadyActive,
+    ConnectionNotFound,
 }

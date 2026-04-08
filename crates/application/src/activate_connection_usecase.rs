@@ -1,9 +1,10 @@
 use domain::models::WireGuardConnection;
 use ports::{
-    inbound::activate_connection_port::ActivateConnectionPort,
-    outbound::wireguard_port::WireGuardPort,
+    inbound::activate_connection_port::{ActivateConnectionPort, ConnectionActivationError},
+    outbound::wireguard_port::{
+        ConnectionActivationError as AdapterConnectionActivationError, WireGuardPort,
+    },
 };
-use std::error::Error;
 
 /// Use case for activating an available connection
 pub struct ActivateConnectionUsecase<'a, W>
@@ -26,12 +27,11 @@ impl<'a, W> ActivateConnectionPort for ActivateConnectionUsecase<'a, W>
 where
     W: WireGuardPort,
 {
-    fn activate(&self, connection: &WireGuardConnection) -> Result<(), Box<dyn Error>> {
+    fn activate(&self, connection: &WireGuardConnection) -> Result<(), ConnectionActivationError> {
         match connection.get_is_active() {
             true => {
-                let msg = "connection is already active";
-                log::warn!("{}", msg);
-                Err(msg.into())
+                log::warn!("{}", "connection is already active");
+                Err(ConnectionActivationError::AlreadyActive)
             }
             false => {
                 let activation_result =
@@ -44,8 +44,23 @@ where
                             connection.get_id(),
                             err
                         );
-                        // TODO: handle specific error
-                        Err("TODO".into())
+                        match err {
+                            AdapterConnectionActivationError::Infrastructure(_i) => {
+                                Err(ConnectionActivationError::Infra)
+                            }
+                            AdapterConnectionActivationError::ConnectionAlreadyActive => {
+                                Err(ConnectionActivationError::AlreadyActive)
+                            }
+                            AdapterConnectionActivationError::ImportedConnectionsRetrieval => {
+                                Err(ConnectionActivationError::Infra)
+                            }
+                            AdapterConnectionActivationError::ConnectionNotFound(_i) => {
+                                Err(ConnectionActivationError::ConnectionNotFound)
+                            }
+                            AdapterConnectionActivationError::CouldNotActivate => {
+                                Err(ConnectionActivationError::Infra)
+                            }
+                        }
                     }
                 }
             }
