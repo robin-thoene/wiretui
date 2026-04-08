@@ -10,7 +10,12 @@ pub trait ActivateConnectionPort {
     ///
     /// # Errors
     ///
-    /// TODO: describe error
+    /// If the provided connection can not be activated, the underlying error is
+    /// returned as custom one.
+    ///
+    /// The main reasons are:
+    /// - infrastructure failure while attempting to interact with the connection manager
+    /// - logical errors, like trying to activate an already active connection
     fn activate(&self, connection: &WireGuardConnection) -> Result<(), ConnectionActivationError>;
 }
 

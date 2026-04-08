@@ -1,9 +1,10 @@
 use domain::models::WireGuardConnection;
 use ports::{
-    inbound::deactivate_connection_port::DeactivateConnectionPort,
-    outbound::wireguard_port::WireGuardPort,
+    inbound::deactivate_connection_port::{ConnectionDeactivationError, DeactivateConnectionPort},
+    outbound::wireguard_port::{
+        ConnectionDeactivationError as AdapterConnectionDeactivationError, WireGuardPort,
+    },
 };
-use std::error::Error;
 
 /// Use case for deactivating an available connection
 pub struct DeactivateConnectionUsecase<'a, W>
@@ -26,9 +27,12 @@ impl<'a, W> DeactivateConnectionPort for DeactivateConnectionUsecase<'a, W>
 where
     W: WireGuardPort,
 {
-    fn deactivate(&self, connection: &WireGuardConnection) -> Result<(), Box<dyn Error>> {
+    fn deactivate(
+        &self,
+        connection: &WireGuardConnection,
+    ) -> Result<(), ConnectionDeactivationError> {
         match connection.get_is_active() {
-            false => Err("connection is not active".into()),
+            false => Err(ConnectionDeactivationError::NotActive),
             true => {
                 let deactivation_result = self
                     .wireguard_port
@@ -41,8 +45,20 @@ where
                             connection.get_id(),
                             err
                         );
-                        // TODO: handle specific error
-                        Err("TODO".into())
+                        match err {
+                            AdapterConnectionDeactivationError::Infrastructure(_i) => {
+                                Err(ConnectionDeactivationError::Infra)
+                            }
+                            AdapterConnectionDeactivationError::ActiveConnectionsRetrieval => {
+                                Err(ConnectionDeactivationError::Infra)
+                            }
+                            AdapterConnectionDeactivationError::NotFound(_n) => {
+                                Err(ConnectionDeactivationError::NotFound)
+                            }
+                            AdapterConnectionDeactivationError::CouldNotDeactivate => {
+                                Err(ConnectionDeactivationError::Infra)
+                            }
+                        }
                     }
                 }
             }

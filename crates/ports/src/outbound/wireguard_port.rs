@@ -134,7 +134,7 @@ pub enum ConnectionDeactivationError {
     /// Error while retrieving the currently active connections
     ActiveConnectionsRetrieval,
     /// Connection to deactivate could not be found
-    ConnectionNotFound(ConnectionNotFoundError),
+    NotFound(ConnectionNotFoundError),
     /// Deactivating the connection failed for reasons on the infra level
     CouldNotDeactivate,
 }
@@ -148,7 +148,7 @@ impl fmt::Display for ConnectionDeactivationError {
             ConnectionDeactivationError::ActiveConnectionsRetrieval => {
                 write!(f, "currently active connections could not be retrieved")
             }
-            ConnectionDeactivationError::ConnectionNotFound(inner) => {
+            ConnectionDeactivationError::NotFound(inner) => {
                 write!(f, "could not deactivate connection: {}", inner)
             }
             ConnectionDeactivationError::CouldNotDeactivate => {

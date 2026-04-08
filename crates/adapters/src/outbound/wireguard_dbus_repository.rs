@@ -192,7 +192,7 @@ impl WireGuardPort for WireGuardDBusRepository {
             }
         } else {
             log::warn!("could not find active connection for provided id");
-            Err(ConnectionDeactivationError::ConnectionNotFound(
+            Err(ConnectionDeactivationError::NotFound(
                 ConnectionNotFoundError,
             ))
         }
