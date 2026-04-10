@@ -1,6 +1,7 @@
 use domain::models::WireGuardConnection;
 use ports::{
-    inbound::list_connections_port::ListConnectionsPort, outbound::wireguard_port::WireGuardPort,
+    inbound::list_connections_port::{ListConnectionError, ListConnectionsPort},
+    outbound::wireguard_port::WireGuardPort,
 };
 
 /// Use case for retrieving all available connections
@@ -24,14 +25,13 @@ impl<'a, W> ListConnectionsPort for ListConnectionsUseCase<'a, W>
 where
     W: WireGuardPort,
 {
-    fn get(&self) -> Vec<WireGuardConnection> {
-        // TODO: error handling
+    fn get(&self) -> Result<Vec<WireGuardConnection>, ListConnectionError> {
         let mut res = self
             .wireguard_port
             .get_imported_connections()
-            .unwrap_or_default();
+            .map_err(|_e| ListConnectionError::Infra)?;
         res.sort_by(|a, b| a.get_id().cmp(b.get_id()));
-        res
+        Ok(res)
     }
 }
 

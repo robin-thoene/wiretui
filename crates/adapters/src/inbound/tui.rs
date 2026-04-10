@@ -78,7 +78,8 @@ where
     /// Load the available VPN connections
     /// and import them to the app state
     fn init_connection_list(&mut self) {
-        self.connections.value = self.list_connections_port.get();
+        // TODO: error handling
+        self.connections.value = self.list_connections_port.get().unwrap_or_default();
         if self
             .connections
             .connection_list_state
@@ -181,7 +182,7 @@ where
                 // Refresh the connection list
                 // TODO: use a more optimal way to mark successful activated conn as active
                 // in ui
-                self.connections.value = self.list_connections_port.get();
+                self.connections.value = self.list_connections_port.get().unwrap_or_default();
             }
         }
     }
