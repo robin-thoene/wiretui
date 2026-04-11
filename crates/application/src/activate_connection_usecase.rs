@@ -42,6 +42,15 @@ where
                     Err(ConnectionActivationError::AlreadyActive)
                 }
                 false => {
+                    // Ensure that previously active connections are deactivated
+                    for conn in connections.iter().filter(|x| *x.get_is_active()) {
+                        let deactivate_res =
+                            self.wireguard_port.deactivate_connection(conn.get_id());
+                        if let Err(_err) = deactivate_res {
+                            return Err(ConnectionActivationError::Infra);
+                        }
+                    }
+                    // Activate the connection
                     let activation_result = self.wireguard_port.activate_connection(conn.get_id());
                     match activation_result {
                         Ok(()) => Ok(()),
