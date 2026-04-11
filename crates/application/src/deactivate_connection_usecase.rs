@@ -31,37 +31,46 @@ where
         &self,
         connection: &WireGuardConnection,
     ) -> Result<(), ConnectionDeactivationError> {
-        match connection.get_is_active() {
-            false => Err(ConnectionDeactivationError::NotActive),
-            true => {
-                let deactivation_result = self
-                    .wireguard_port
-                    .deactivate_connection(connection.get_id());
-                match deactivation_result {
-                    Ok(()) => Ok(()),
-                    Err(err) => {
-                        log::error!(
-                            "error occurred while attempting to deactivate connection {}: {}",
-                            connection.get_id(),
-                            err
-                        );
-                        match err {
-                            AdapterConnectionDeactivationError::Infrastructure(_i) => {
-                                Err(ConnectionDeactivationError::Infra)
-                            }
-                            AdapterConnectionDeactivationError::ActiveConnectionsRetrieval => {
-                                Err(ConnectionDeactivationError::Infra)
-                            }
-                            AdapterConnectionDeactivationError::NotFound(_n) => {
-                                Err(ConnectionDeactivationError::NotFound)
-                            }
-                            AdapterConnectionDeactivationError::CouldNotDeactivate => {
-                                Err(ConnectionDeactivationError::Infra)
+        let connections = self
+            .wireguard_port
+            .get_imported_connections()
+            .map_err(|_e| ConnectionDeactivationError::Infra)?;
+        let conn = connections
+            .iter()
+            .find(|x| x.get_id() == connection.get_id());
+        match conn {
+            Some(conn) => match conn.get_is_active() {
+                false => Err(ConnectionDeactivationError::NotActive),
+                true => {
+                    let deactivation_result =
+                        self.wireguard_port.deactivate_connection(conn.get_id());
+                    match deactivation_result {
+                        Ok(()) => Ok(()),
+                        Err(err) => {
+                            log::error!(
+                                "error occurred while attempting to deactivate connection {}: {}",
+                                conn.get_id(),
+                                err
+                            );
+                            match err {
+                                AdapterConnectionDeactivationError::Infrastructure(_i) => {
+                                    Err(ConnectionDeactivationError::Infra)
+                                }
+                                AdapterConnectionDeactivationError::ActiveConnectionsRetrieval => {
+                                    Err(ConnectionDeactivationError::Infra)
+                                }
+                                AdapterConnectionDeactivationError::NotFound(_n) => {
+                                    Err(ConnectionDeactivationError::NotFound)
+                                }
+                                AdapterConnectionDeactivationError::CouldNotDeactivate => {
+                                    Err(ConnectionDeactivationError::Infra)
+                                }
                             }
                         }
                     }
                 }
-            }
+            },
+            None => Err(ConnectionDeactivationError::Infra),
         }
     }
 }

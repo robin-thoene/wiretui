@@ -28,42 +28,51 @@ where
     W: WireGuardPort,
 {
     fn activate(&self, connection: &WireGuardConnection) -> Result<(), ConnectionActivationError> {
-        match connection.get_is_active() {
-            true => {
-                log::warn!("{}", "connection is already active");
-                Err(ConnectionActivationError::AlreadyActive)
-            }
-            false => {
-                let activation_result =
-                    self.wireguard_port.activate_connection(connection.get_id());
-                match activation_result {
-                    Ok(()) => Ok(()),
-                    Err(err) => {
-                        log::error!(
-                            "error occurred while attempting to activate connection {}: {}",
-                            connection.get_id(),
-                            err
-                        );
-                        match err {
-                            AdapterConnectionActivationError::Infrastructure(_i) => {
-                                Err(ConnectionActivationError::Infra)
-                            }
-                            AdapterConnectionActivationError::ConnectionAlreadyActive => {
-                                Err(ConnectionActivationError::AlreadyActive)
-                            }
-                            AdapterConnectionActivationError::ImportedConnectionsRetrieval => {
-                                Err(ConnectionActivationError::Infra)
-                            }
-                            AdapterConnectionActivationError::ConnectionNotFound(_i) => {
-                                Err(ConnectionActivationError::ConnectionNotFound)
-                            }
-                            AdapterConnectionActivationError::CouldNotActivate => {
-                                Err(ConnectionActivationError::Infra)
+        let connections = self
+            .wireguard_port
+            .get_imported_connections()
+            .map_err(|_e| ConnectionActivationError::Infra)?;
+        let conn = connections
+            .iter()
+            .find(|x| x.get_id() == connection.get_id());
+        match conn {
+            Some(conn) => match conn.get_is_active() {
+                true => {
+                    log::warn!("{}", "connection is already active");
+                    Err(ConnectionActivationError::AlreadyActive)
+                }
+                false => {
+                    let activation_result = self.wireguard_port.activate_connection(conn.get_id());
+                    match activation_result {
+                        Ok(()) => Ok(()),
+                        Err(err) => {
+                            log::error!(
+                                "error occurred while attempting to activate connection {}: {}",
+                                conn.get_id(),
+                                err
+                            );
+                            match err {
+                                AdapterConnectionActivationError::Infrastructure(_i) => {
+                                    Err(ConnectionActivationError::Infra)
+                                }
+                                AdapterConnectionActivationError::ConnectionAlreadyActive => {
+                                    Err(ConnectionActivationError::AlreadyActive)
+                                }
+                                AdapterConnectionActivationError::ImportedConnectionsRetrieval => {
+                                    Err(ConnectionActivationError::Infra)
+                                }
+                                AdapterConnectionActivationError::ConnectionNotFound(_i) => {
+                                    Err(ConnectionActivationError::ConnectionNotFound)
+                                }
+                                AdapterConnectionActivationError::CouldNotActivate => {
+                                    Err(ConnectionActivationError::Infra)
+                                }
                             }
                         }
                     }
                 }
-            }
+            },
+            None => Err(ConnectionActivationError::ConnectionNotFound),
         }
     }
 }
