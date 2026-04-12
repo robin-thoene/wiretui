@@ -78,20 +78,25 @@ where
     /// Load the available VPN connections
     /// and import them to the app state
     fn init_connection_list(&mut self) {
-        self.connections.value = self.list_connections_port.get();
-        if self
-            .connections
-            .connection_list_state
-            .list_state
-            .selected()
-            .is_none()
-            && !self.connections.value.is_empty()
-        {
-            // Ensure that at any time there is already a selected item
-            self.connections
+        let connections_result = self.list_connections_port.get();
+        if let Ok(conn) = connections_result {
+            self.connections.value = conn;
+            if self
+                .connections
                 .connection_list_state
                 .list_state
-                .select(Some(0));
+                .selected()
+                .is_none()
+                && !self.connections.value.is_empty()
+            {
+                // Ensure that at any time there is already a selected item
+                self.connections
+                    .connection_list_state
+                    .list_state
+                    .select(Some(0));
+            }
+        } else {
+            // TODO: display error in UI
         }
     }
 
@@ -166,22 +171,33 @@ where
 
     /// Toggles the selected connection. If it is active, deactivate it and vice versa
     fn toggle_selected_connection(&mut self) {
-        // TODO: better handling of unexpected state and errors
         let idx = self.connections.connection_list_state.list_state.selected();
         if let Some(idx) = idx {
             let selected = self.connections.value.get(idx);
             if let Some(conn) = selected {
                 if conn.get_is_active() == &true {
                     // Attempt to deactivate the selected connection if it is already active
-                    let _ = self.deactivate_connection_port.deactivate(conn);
+                    let res = self.deactivate_connection_port.deactivate(conn);
+                    if let Err(error) = res {
+                        log::error!("{}", error);
+                        // TODO: display error in UI
+                    }
                 } else {
                     // Attempt to activate the selected connection if it is not yet active
-                    let _ = self.activate_connection_port.activate(conn);
+                    let res = self.activate_connection_port.activate(conn);
+                    if let Err(error) = res {
+                        log::error!("{}", error);
+                        // TODO: display error in UI
+                    }
                 }
                 // Refresh the connection list
                 // TODO: use a more optimal way to mark successful activated conn as active
-                // in ui
-                self.connections.value = self.list_connections_port.get();
+                let connections_result = self.list_connections_port.get();
+                if let Ok(conn) = connections_result {
+                    self.connections.value = conn;
+                } else {
+                    // TODO: display error in UI
+                }
             }
         }
     }

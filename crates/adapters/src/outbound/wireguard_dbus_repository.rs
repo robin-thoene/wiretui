@@ -4,7 +4,10 @@ use crate::outbound::dbus_repository::{
     NetworkManagerSettingsProxyBlocking,
 };
 use domain::models::WireGuardConnection;
-use ports::outbound::wireguard_port::WireGuardPort;
+use ports::outbound::wireguard_port::{
+    ConnectionActivationError, ConnectionDeactivationError, ConnectionNotFoundError,
+    GetConnectionsError, InfrastructureError, WireGuardPort,
+};
 use zbus::{blocking::Connection, zvariant::OwnedObjectPath};
 
 /// Internal representation of a single WireGuard connection
@@ -102,10 +105,11 @@ impl WireGuardDBusRepository {
 }
 
 impl WireGuardPort for WireGuardDBusRepository {
-    fn get_imported_connections(
-        &self,
-    ) -> Result<Vec<WireGuardConnection>, Box<dyn std::error::Error>> {
-        let internal_connections = self.get_imported_connections_internal()?;
+    fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
+        let internal_connections = self.get_imported_connections_internal().map_err(|err| {
+            log::error!("error {} getting connections from D-Bus", err);
+            GetConnectionsError::Infrastructure(InfrastructureError)
+        })?;
         let mut res = vec![];
         for connection in internal_connections {
             res.push(WireGuardConnection::new(
@@ -116,36 +120,49 @@ impl WireGuardPort for WireGuardDBusRepository {
         Ok(res)
     }
 
-    fn activate_connection(&self, id: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let connections = self.get_imported_connections_internal()?;
+    fn activate_connection(&self, id: &str) -> Result<(), ConnectionActivationError> {
+        let connections = self.get_imported_connections_internal().map_err(|err| {
+            log::error!("error {} getting connections from D-Bus", err);
+            ConnectionActivationError::ImportedConnectionsRetrieval
+        })?;
         let conn = connections.iter().find(|x| x.id == id);
         if let Some(conn) = conn {
             if conn.is_active {
-                let msg = "can not activate a connection that is already active";
-                log::warn!("{}", msg);
-                return Err(msg.into());
+                log::warn!("can not activate a connection that is already active");
+                return Err(ConnectionActivationError::ConnectionAlreadyActive);
             }
             let r_path =
                 OwnedObjectPath::try_from("/").expect("expect the root objectpath to be created");
-            let nm_proxy = NetworkManagerProxyBlocking::new(&self.dbus_connection)?;
+            let nm_proxy =
+                NetworkManagerProxyBlocking::new(&self.dbus_connection).map_err(|err| {
+                    log::error!("error {} when connecting to D-Bus interface", err);
+                    ConnectionActivationError::Infrastructure(InfrastructureError)
+                })?;
             let result = nm_proxy.activate_connection(&conn.path, &r_path, &r_path);
             match result {
                 Ok(_ok) => Ok(()),
                 Err(err) => {
                     log::error!("could not activate connection {} using D-Bus: {}", id, err);
-                    Err("could not activate connection".into())
+                    Err(ConnectionActivationError::CouldNotActivate)
                 }
             }
         } else {
-            let msg = "could not find connection";
-            log::warn!("{}", msg);
-            Err(msg.into())
+            log::warn!("could not find connection");
+            Err(ConnectionActivationError::ConnectionNotFound(
+                ConnectionNotFoundError,
+            ))
         }
     }
 
-    fn deactivate_connection(&self, id: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let nm_proxy = NetworkManagerProxyBlocking::new(&self.dbus_connection)?;
-        let active_connections = nm_proxy.active_connections()?;
+    fn deactivate_connection(&self, id: &str) -> Result<(), ConnectionDeactivationError> {
+        let nm_proxy = NetworkManagerProxyBlocking::new(&self.dbus_connection).map_err(|err| {
+            log::error!("error {} when connecting to D-Bus interface", err);
+            ConnectionDeactivationError::Infrastructure(InfrastructureError)
+        })?;
+        let active_connections = nm_proxy.active_connections().map_err(|err| {
+            log::error!("error {} when retrieving currently active connections", err);
+            ConnectionDeactivationError::ActiveConnectionsRetrieval
+        })?;
         // TODO: this is ugly, refactor
         let mut active_connection_path: Option<OwnedObjectPath> = None;
         for ac in active_connections {
@@ -170,13 +187,14 @@ impl WireGuardPort for WireGuardDBusRepository {
                         id,
                         err
                     );
-                    Err("could not deactivate connection".into())
+                    Err(ConnectionDeactivationError::CouldNotDeactivate)
                 }
             }
         } else {
-            let msg = "could not find active connection for provided id";
-            log::warn!("{}", msg);
-            Err(msg.into())
+            log::warn!("could not find active connection for provided id");
+            Err(ConnectionDeactivationError::NotFound(
+                ConnectionNotFoundError,
+            ))
         }
     }
 }

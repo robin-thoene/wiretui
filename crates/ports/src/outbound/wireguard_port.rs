@@ -1,22 +1,159 @@
 use domain::models::WireGuardConnection;
-use std::error::Error;
+use std::{
+    error::Error,
+    fmt::{self},
+};
 
 /// Must be implemented by adapters handling WireGuard
 pub trait WireGuardPort {
     /// Retrieves all already imported and available WireGuard connections
-    fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, Box<dyn Error>>;
+    ///
+    /// # Errors
+    ///
+    /// If the imported connections can not be retrieved, the underlying error is returned as
+    /// custom one. This happens mostly because of a failure connecting or interacting with the
+    /// used infrastructure to access and interact with network connections.
+    fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, GetConnectionsError>;
 
     /// Activate a single connection
     ///
     /// # Arguments
     ///
     /// * `id` - The connection identifier
-    fn activate_connection(&self, id: &str) -> Result<(), Box<dyn Error>>;
+    ///
+    /// # Errors
+    ///
+    /// If the connection for the provided identifier can not be activated, the underlying error
+    /// is returned as custom one.
+    ///
+    /// The two main reasons are:
+    /// - infrastructure failure while attempting to activate the connection
+    /// - logical error (for example connection with id does not exist or is already active)
+    fn activate_connection(&self, id: &str) -> Result<(), ConnectionActivationError>;
 
     /// Deactivate a single connection
     ///
     /// # Arguments
     ///
     /// * `id` - The connection identifier
-    fn deactivate_connection(&self, id: &str) -> Result<(), Box<dyn Error>>;
+    ///
+    /// # Errors
+    ///
+    /// If the connection for the provided identifier can not be deactivated, the underlying error
+    /// is returned as custom one.
+    ///
+    /// The two main reasons are:
+    /// - infrastructure failure while attempting to deactivate the connection
+    /// - logical error (for example connection with id does not exist)
+    fn deactivate_connection(&self, id: &str) -> Result<(), ConnectionDeactivationError>;
+}
+
+/// Error that occurs when trying to connect with the infrastructure used to manage the network
+/// connections
+#[derive(Debug)]
+pub struct InfrastructureError;
+impl Error for InfrastructureError {}
+impl fmt::Display for InfrastructureError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "error while interacting with the network managing infrastructure"
+        )
+    }
+}
+
+/// Error that occurs when trying to access a connection that can not be found
+#[derive(Debug)]
+pub struct ConnectionNotFoundError;
+impl Error for ConnectionNotFoundError {}
+impl fmt::Display for ConnectionNotFoundError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "the connection could not be found")
+    }
+}
+
+/// Error types that could occur when trying to receive all imported connections
+#[derive(Debug)]
+pub enum GetConnectionsError {
+    /// Error while connecting to the infrastructure that is used to manage connections
+    Infrastructure(InfrastructureError),
+}
+impl Error for GetConnectionsError {}
+impl fmt::Display for GetConnectionsError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match &self {
+            GetConnectionsError::Infrastructure(inner) => {
+                write!(f, "could not retrieve imported connections: {}", inner)
+            }
+        }
+    }
+}
+
+/// Error types that could occur when trying to activate a connection
+#[derive(Debug)]
+pub enum ConnectionActivationError {
+    /// Error while connecting to the infrastructure that is used to manage connections
+    Infrastructure(InfrastructureError),
+    /// Error attempting to activate a connection that is already active
+    ConnectionAlreadyActive,
+    /// Error while retrieving the imported connections
+    ImportedConnectionsRetrieval,
+    /// Connection to activate could not be found
+    ConnectionNotFound(ConnectionNotFoundError),
+    /// Activating the connection failed for reasons on the infra level
+    CouldNotActivate,
+}
+impl Error for ConnectionActivationError {}
+impl fmt::Display for ConnectionActivationError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match &self {
+            ConnectionActivationError::Infrastructure(inner) => {
+                write!(f, "could not activate connection: {}", inner)
+            }
+            ConnectionActivationError::ConnectionAlreadyActive => {
+                write!(f, "targeted connection is already active")
+            }
+            ConnectionActivationError::ImportedConnectionsRetrieval => {
+                write!(f, "currently imported connections could not be retrieved")
+            }
+            ConnectionActivationError::ConnectionNotFound(inner) => {
+                write!(f, "could not activate connection: {}", inner)
+            }
+            ConnectionActivationError::CouldNotActivate => {
+                write!(f, "could not activate the connection")
+            }
+        }
+    }
+}
+
+/// Error types that could occur when trying to deactivate a connection
+#[derive(Debug)]
+pub enum ConnectionDeactivationError {
+    /// Error while connecting to the infrastructure that is used to manage connections
+    Infrastructure(InfrastructureError),
+    /// Error while retrieving the currently active connections
+    ActiveConnectionsRetrieval,
+    /// Connection to deactivate could not be found
+    NotFound(ConnectionNotFoundError),
+    /// Deactivating the connection failed for reasons on the infra level
+    CouldNotDeactivate,
+}
+impl Error for ConnectionDeactivationError {}
+impl fmt::Display for ConnectionDeactivationError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match &self {
+            ConnectionDeactivationError::Infrastructure(inner) => {
+                write!(f, "could not deactivate connection: {}", inner)
+            }
+            ConnectionDeactivationError::ActiveConnectionsRetrieval => {
+                write!(f, "currently active connections could not be retrieved")
+            }
+            ConnectionDeactivationError::NotFound(inner) => {
+                write!(f, "could not deactivate connection: {}", inner)
+            }
+            ConnectionDeactivationError::CouldNotDeactivate => {
+                write!(f, "could not deactivate connection")
+            }
+        }
+    }
 }
