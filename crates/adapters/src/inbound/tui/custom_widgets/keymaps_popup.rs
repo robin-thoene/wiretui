@@ -23,7 +23,6 @@ impl Widget for KeymapsPopup {
         ];
         let help_popup_content = Paragraph::new(keymaps).block(
             Block::bordered()
-                .padding(Padding::new(2, 2, 1, 1))
                 .border_style(HIGHLIGHT_STYLE)
                 .border_type(BorderType::Thick)
                 .title(" Help ")
@@ -39,8 +38,9 @@ impl Widget for KeymapsPopup {
 ///
 /// * `area` - The area that will partially be covered by the popup
 fn popup_area(area: Rect) -> Rect {
-    let vertical = Layout::vertical([Constraint::Percentage(20)]).flex(Flex::Center);
-    let horizontal = Layout::horizontal([Constraint::Percentage(60)]).flex(Flex::Center);
+    // TODO: find a better way that scales automatically in height and with
+    let vertical = Layout::vertical([Constraint::Length(7)]).flex(Flex::Center);
+    let horizontal = Layout::horizontal([Constraint::Length(60)]).flex(Flex::Center);
     let [area] = vertical.areas(area);
     let [area] = horizontal.areas(area);
     area
