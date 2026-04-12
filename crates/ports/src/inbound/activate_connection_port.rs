@@ -22,5 +22,5 @@ pub trait ActivateConnectionPort {
 pub enum ConnectionActivationError {
     Infra,
     AlreadyActive,
-    ConnectionNotFound,
+    NotFound,
 }

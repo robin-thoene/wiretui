@@ -71,7 +71,7 @@ where
                                     Err(ConnectionActivationError::Infra)
                                 }
                                 AdapterConnectionActivationError::ConnectionNotFound(_i) => {
-                                    Err(ConnectionActivationError::ConnectionNotFound)
+                                    Err(ConnectionActivationError::NotFound)
                                 }
                                 AdapterConnectionActivationError::CouldNotActivate => {
                                     Err(ConnectionActivationError::Infra)
@@ -81,7 +81,7 @@ where
                     }
                 }
             },
-            None => Err(ConnectionActivationError::ConnectionNotFound),
+            None => Err(ConnectionActivationError::NotFound),
         }
     }
 }
