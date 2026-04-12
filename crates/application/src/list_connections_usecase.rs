@@ -68,13 +68,15 @@ mod list_connections_usecase_tests {
         // Act
         let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
         // Assert
-        assert_eq!(result, Vec::<WireGuardConnection>::new());
-        assert_eq!(result.len(), 0);
+        assert!(result.is_ok());
+        let data = result.expect("expecting no error");
+        assert_eq!(data, Vec::<WireGuardConnection>::new());
+        assert_eq!(data.len(), 0);
     }
 
-    /// Ensures that an error on the WireGuardPort results in a fallback to an empty vec
+    /// Ensures that an error on the WireGuardPort results in the correct custom error return type
     #[test]
-    fn fallback_to_empty_vec() {
+    fn return_infra_error_correctly() {
         // Arrange
         #[derive(Default)]
         struct WireGuardDbusRepoMock {}
@@ -96,8 +98,7 @@ mod list_connections_usecase_tests {
         // Act
         let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
         // Assert
-        assert_eq!(result, Vec::<WireGuardConnection>::new());
-        assert_eq!(result.len(), 0);
+        assert!(result.is_err_and(|x| x == ListConnectionError::Infra));
     }
 
     /// Ensures that the items that are retrieved from the WireGuardPort are returned correctly
@@ -139,8 +140,10 @@ mod list_connections_usecase_tests {
         // Act
         let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
         // Assert
-        assert_eq!(result, expected_data);
-        assert_eq!(result.len(), expected_data.len());
+        assert!(result.is_ok());
+        let data = result.expect("expecting no error");
+        assert_eq!(data, expected_data);
+        assert_eq!(data.len(), expected_data.len());
     }
 
     /// Ensures that the items that are retrieved from the WireGuardPort are sorted by id before
@@ -183,7 +186,9 @@ mod list_connections_usecase_tests {
         // Act
         let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
         // Assert
-        assert_eq!(result, expected_data);
-        assert_eq!(result.len(), expected_data.len());
+        assert!(result.is_ok());
+        let data = result.expect("expecting no error");
+        assert_eq!(data, expected_data);
+        assert_eq!(data.len(), expected_data.len());
     }
 }

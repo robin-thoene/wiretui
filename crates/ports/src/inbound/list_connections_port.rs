@@ -11,7 +11,7 @@ pub trait ListConnectionsPort {
     fn get(&self) -> Result<Vec<WireGuardConnection>, ListConnectionError>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ListConnectionError {
     Infra,
 }
