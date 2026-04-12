@@ -1,4 +1,5 @@
 use domain::models::WireGuardConnection;
+use std::{error::Error, fmt};
 
 /// Defines the inbound port to deactivate an available connection
 pub trait DeactivateConnectionPort {
@@ -27,4 +28,18 @@ pub enum ConnectionDeactivationError {
     Infra,
     NotActive,
     NotFound,
+}
+impl Error for ConnectionDeactivationError {}
+impl fmt::Display for ConnectionDeactivationError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ConnectionDeactivationError::Infra => write!(f, "an error occurred"),
+            ConnectionDeactivationError::NotActive => {
+                write!(f, "the connection is not active at the moment")
+            }
+            ConnectionDeactivationError::NotFound => {
+                write!(f, "the connection to deactivate could not be found")
+            }
+        }
+    }
 }

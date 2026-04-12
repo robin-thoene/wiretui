@@ -1,4 +1,5 @@
 use domain::models::WireGuardConnection;
+use std::{error::Error, fmt};
 
 /// Defines the inbound port to list all available connections
 ///
@@ -14,4 +15,12 @@ pub trait ListConnectionsPort {
 #[derive(Debug, PartialEq, Eq)]
 pub enum ListConnectionError {
     Infra,
+}
+impl Error for ListConnectionError {}
+impl fmt::Display for ListConnectionError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ListConnectionError::Infra => write!(f, "an error occurred"),
+        }
+    }
 }

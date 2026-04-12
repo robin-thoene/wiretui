@@ -9,8 +9,8 @@ use crate::inbound::tui::custom_widgets::{
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use domain::models::WireGuardConnection;
 use ports::inbound::{
-    activate_connection_port::{ActivateConnectionPort, ConnectionActivationError},
-    deactivate_connection_port::{ConnectionDeactivationError, DeactivateConnectionPort},
+    activate_connection_port::ActivateConnectionPort,
+    deactivate_connection_port::DeactivateConnectionPort,
     list_connections_port::ListConnectionsPort,
 };
 use ratatui::{
@@ -179,32 +179,14 @@ where
                     // Attempt to deactivate the selected connection if it is already active
                     let res = self.deactivate_connection_port.deactivate(conn);
                     if let Err(error) = res {
-                        let error_msg = match error {
-                            ConnectionDeactivationError::Infra => "An error occurred",
-                            ConnectionDeactivationError::NotActive => {
-                                "The connection is not active at the moment"
-                            }
-                            ConnectionDeactivationError::NotFound => {
-                                "The connection to deactivate could not be found"
-                            }
-                        };
-                        log::error!("{}", error_msg);
+                        log::error!("{}", error);
                         // TODO: display error in UI
                     }
                 } else {
                     // Attempt to activate the selected connection if it is not yet active
                     let res = self.activate_connection_port.activate(conn);
                     if let Err(error) = res {
-                        let error_msg = match error {
-                            ConnectionActivationError::Infra => "An error occurred",
-                            ConnectionActivationError::AlreadyActive => {
-                                "The connection is already active"
-                            }
-                            ConnectionActivationError::NotFound => {
-                                "The connection to activate could not be found"
-                            }
-                        };
-                        log::error!("{}", error_msg);
+                        log::error!("{}", error);
                         // TODO: display error in UI
                     }
                 }
