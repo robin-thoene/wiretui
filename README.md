@@ -30,7 +30,7 @@ binaries that you can download from releases ([#3](https://github.com/robin-thoe
 ```shell
 git clone https://github.com/robin-thoene/wiretui.git
 cd wiretui
-cargo build --release
+cargo install --path ./crates/tui/
 ```
 
 ## Usage
