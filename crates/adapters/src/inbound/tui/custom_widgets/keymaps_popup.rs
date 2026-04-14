@@ -2,7 +2,7 @@ use crate::inbound::tui::styles::HIGHLIGHT_STYLE;
 use ratatui::{
     layout::{Alignment, Constraint, Flex, Layout, Rect},
     text::Line,
-    widgets::{Block, BorderType, Padding, Paragraph, Widget},
+    widgets::{Block, BorderType, Paragraph, Widget},
 };
 
 /// Popup that displays all available keymaps for the entire application

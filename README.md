@@ -7,9 +7,7 @@ A minimal keyboard-driven TUI to manage WireGuard VPN connections, heavily inspi
 
 ## Demo
 
-TODO
-
-<!-- ![icon](./assets/demo.png) -->
+![animation](./assets/demo.gif)
 
 ## Prerequisites
 
