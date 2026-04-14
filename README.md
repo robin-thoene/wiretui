@@ -5,13 +5,67 @@
 A minimal keyboard-driven TUI to manage WireGuard VPN connections, heavily inspired by
 [bluetui](https://github.com/pythops/bluetui) and [impala](https://github.com/pythops/impala).
 
-## ⚠️Warning
+## Demo
 
-This project is currently in development and is not yet stable nor meant to be used.
+![animation](./assets/demo.gif)
 
 ## Prerequisites
 
-You will need to use a Linux based operating system with the **networkmanager**.
+You will need to use a **Linux** based operating system using the **NetworkManager**.
+
+## (Planned) features
+
+- [x] list all imported connections
+- [x] activate a connection
+- [x] deactivate a connection
+- [ ] import a new connection from a config file ([#7](https://github.com/robin-thoene/wiretui/issues/7))
+- [ ] remove an existing connection ([#6](https://github.com/robin-thoene/wiretui/issues/6))
+- [ ] search connection list ([#13](https://github.com/robin-thoene/wiretui/issues/13))
+
+## Installation
+
+Currently the only option to install is building from source, but it is planned to add pre-built
+binaries that you can download from releases ([#3](https://github.com/robin-thoene/wiretui/issues/3)).
+
+```shell
+git clone https://github.com/robin-thoene/wiretui.git
+cd wiretui
+cargo install --path ./crates/tui/
+```
+
+## Usage
+
+### Starting
+
+```shell
+wiretui
+```
+
+### Keybindings
+
+`j`: move down
+
+`k`: move up
+
+`SPACE`: toggle a connection
+
+`?`: open the help menu
+
+`ESC`: close a menu
+
+`q`: quit application
+
+### Importing connections
+
+Until this feature is integrated into wiretui, you can import connections from WireGuard config
+files like so:
+
+```shell
+# Import from config using the CLI of the NetworkManager
+nmcli connection import type wireguard file ./your_wireguard_config_file.conf
+# Use this command if you want to disable the autoconnect functionality
+nmcli connection modify IMPORTED_CONNECTION_NAME connection.autoconnect no
+```
 
 ## Local development
 
@@ -65,3 +119,18 @@ RUST_LOG=debug cargo run
 ```
 
 Valid log level are `trace`, `debug`, `info`, `warn` and `error`.
+
+## Contributing
+
+As of now this project is publicly available but not actively asking for or accepting pull
+requests until I finished my desired MVP state. This is due to the fact that the project is part
+of a university module as well as a learning opportunity for myself.
+
+For the moment you can contribute best by:
+
+- submitting bug reports
+- reviewing code to be idiomatic, secure and performant
+
+## License
+
+See the [LICENSE](https://github.com/robin-thoene/wiretui/blob/main/LICENSE)
