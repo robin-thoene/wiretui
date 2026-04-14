@@ -28,7 +28,7 @@ fn main() -> io::Result<()> {
     let list_connections_usecase = ListConnectionsUseCase::new(&wireguard_dbus_adapter);
     let activate_connection_usecase = ActivateConnectionUsecase::new(&wireguard_dbus_adapter);
     let deactivate_connection_usecase = DeactivateConnectionUsecase::new(&wireguard_dbus_adapter);
-    log::debug!("buit the dependencies");
+    log::debug!("built the dependencies");
     // Build and run the TUI application
     let mut tui_app = App::new(
         list_connections_usecase,
