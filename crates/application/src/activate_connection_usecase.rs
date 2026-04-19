@@ -90,7 +90,8 @@ where
 mod activate_connection_usecase_tests {
     use super::*;
     use ports::outbound::wireguard_port::{
-        ConnectionActivationError, ConnectionDeactivationError, GetConnectionsError,
+        ConnectionActivationError as AdapterConnectionActivationError, ConnectionDeactivationError,
+        GetConnectionsError,
     };
     use std::cell::RefCell;
 
@@ -187,7 +188,7 @@ mod activate_connection_usecase_tests {
             Ok(conns)
         }
 
-        fn activate_connection(&self, id: &str) -> Result<(), ConnectionActivationError> {
+        fn activate_connection(&self, id: &str) -> Result<(), AdapterConnectionActivationError> {
             self.set_internal_conn_state(id, true);
             Ok(())
         }
@@ -314,6 +315,51 @@ mod activate_connection_usecase_tests {
                 .expect("a single active connection exists here")
                 .get_id(),
             id_to_activate
+        );
+    }
+
+    /// Ensures that activating one connection that is already active results in the expected error
+    #[test]
+    fn error_connection_already_active() {
+        // Arrange
+        let dbus_repo_mock = WireGuardDbusRepoMock::init_conn_list_with_active();
+        let id_to_activate = "some-id-4";
+        // Act
+        let result = ActivateConnectionUsecase::new(&dbus_repo_mock)
+            .activate(&WireGuardConnection::new(id_to_activate.into(), false));
+        // Assert
+        assert!(result.is_err());
+        assert_eq!(
+            result.expect_err("expect to be an error"),
+            ConnectionActivationError::AlreadyActive
+        );
+        // The connections was already active and is expected to stay active even after this
+        // error
+        assert_eq!(
+            dbus_repo_mock
+                .get_active_connections()
+                .first()
+                .expect("a single active connection exists here")
+                .get_id(),
+            id_to_activate
+        );
+    }
+
+    /// Ensures that trying to activate a connection that does not exist results in the expected
+    /// error
+    #[test]
+    fn error_connection_to_activate_does_not_exist() {
+        // Arrange
+        let dbus_repo_mock = WireGuardDbusRepoMock::init_conn_list();
+        let id_to_activate = "some-id-does-not-exist";
+        // Act
+        let result = ActivateConnectionUsecase::new(&dbus_repo_mock)
+            .activate(&WireGuardConnection::new(id_to_activate.into(), false));
+        // Assert
+        assert!(result.is_err());
+        assert_eq!(
+            result.expect_err("expect to be an error"),
+            ConnectionActivationError::NotFound
         );
     }
 }

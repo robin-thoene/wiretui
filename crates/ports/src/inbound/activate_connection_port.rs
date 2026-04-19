@@ -20,7 +20,7 @@ pub trait ActivateConnectionPort {
     fn activate(&self, connection: &WireGuardConnection) -> Result<(), ConnectionActivationError>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ConnectionActivationError {
     Infra,
     AlreadyActive,
