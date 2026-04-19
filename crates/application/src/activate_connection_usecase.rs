@@ -90,8 +90,8 @@ where
 mod activate_connection_usecase_tests {
     use super::*;
     use ports::outbound::wireguard_port::{
-        ConnectionActivationError as AdapterConnectionActivationError, ConnectionDeactivationError,
-        GetConnectionsError,
+        ConnectionActivationError as AdapterConnectionActivationError,
+        ConnectionDeactivationError as AdapterConnectionDeactivationError, GetConnectionsError,
     };
     use std::cell::RefCell;
 
@@ -193,7 +193,10 @@ mod activate_connection_usecase_tests {
             Ok(())
         }
 
-        fn deactivate_connection(&self, id: &str) -> Result<(), ConnectionDeactivationError> {
+        fn deactivate_connection(
+            &self,
+            id: &str,
+        ) -> Result<(), AdapterConnectionDeactivationError> {
             self.set_internal_conn_state(id, false);
             Ok(())
         }
