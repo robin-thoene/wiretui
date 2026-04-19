@@ -18,14 +18,16 @@ You will need to use a **Linux** based operating system using the **NetworkManag
 - [x] list all imported connections
 - [x] activate a connection
 - [x] deactivate a connection
-- [ ] import a new connection from a config file ([#7](https://github.com/robin-thoene/wiretui/issues/7))
+- [ ] import a new connection from a config file
+      ([#7](https://github.com/robin-thoene/wiretui/issues/7))
 - [ ] remove an existing connection ([#6](https://github.com/robin-thoene/wiretui/issues/6))
 - [ ] search connection list ([#13](https://github.com/robin-thoene/wiretui/issues/13))
 
 ## Installation
 
 Currently the only option to install is building from source, but it is planned to add pre-built
-binaries that you can download from releases ([#3](https://github.com/robin-thoene/wiretui/issues/3)).
+binaries that you can download from releases
+([#3](https://github.com/robin-thoene/wiretui/issues/3)).
 
 ```shell
 git clone https://github.com/robin-thoene/wiretui.git
@@ -97,8 +99,7 @@ cargo deny check
 
 ### Debugging
 
-This project contains a debugger configuration using [.vscode files](./.vscode/). Those can be
-used in Neovim as well (see example [here](https://github.com/robin-thoene/dotfiles/blob/f388381f49d4b79e2755e18929d2462d198bd30d/.config/nvim/lua/plugins/nvim_dap.lua#L98)).
+This project contains a debugger configuration using [.vscode files](./.vscode/).
 
 ## Logging
 
@@ -133,4 +134,4 @@ For the moment you can contribute best by:
 
 ## License
 
-See the [LICENSE](https://github.com/robin-thoene/wiretui/blob/main/LICENSE)
+See the [LICENSE](./LICENSE)
