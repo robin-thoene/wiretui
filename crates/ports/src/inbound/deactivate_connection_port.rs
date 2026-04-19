@@ -23,7 +23,7 @@ pub trait DeactivateConnectionPort {
     ) -> Result<(), ConnectionDeactivationError>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ConnectionDeactivationError {
     Infra,
     NotActive,
