@@ -89,28 +89,6 @@ mod deactivate_connection_usecase_tests {
     }
 
     impl WireGuardDbusRepoMock {
-        /// Initialize the mock implementation with a single non-active connection
-        pub fn init_single_conn() -> Self {
-            Self {
-                available_connections: RefCell::new(vec![WireGuardConnection::new(
-                    "some-id".into(),
-                    false,
-                )]),
-            }
-        }
-
-        /// Initialize the mock implementation with a bunch of non-active connections
-        pub fn init_conn_list() -> Self {
-            Self {
-                available_connections: RefCell::new(vec![
-                    WireGuardConnection::new("some-id-1".into(), false),
-                    WireGuardConnection::new("some-id-2".into(), false),
-                    WireGuardConnection::new("some-id-3".into(), false),
-                    WireGuardConnection::new("some-id-4".into(), false),
-                ]),
-            }
-        }
-
         /// Initialize the mock implementation with a bunch of non-active connections
         /// and one that is currently marked as active
         pub fn init_conn_list_with_active() -> Self {
@@ -251,6 +229,29 @@ mod deactivate_connection_usecase_tests {
         assert_eq!(
             result.expect_err("expecting an error"),
             ConnectionDeactivationError::NotFound
+        );
+        assert_eq!(
+            dbus_repo_mock.get_active_connections().iter().len(),
+            active_conn_count
+        );
+    }
+
+    /// Ensure that the deactivation fails with the expected error if the connection to deactivate
+    /// is not currently active
+    #[test]
+    fn error_connection_to_deactivate_is_not_active() {
+        // Arrange
+        let dbus_repo_mock = WireGuardDbusRepoMock::init_conn_list_with_active();
+        let active_conn_count = dbus_repo_mock.get_active_connections().len();
+        let id_to_deactivate = "some-id-1";
+        // Act
+        let result = DeactivateConnectionUsecase::new(&dbus_repo_mock)
+            .deactivate(&WireGuardConnection::new(id_to_deactivate.into(), true));
+        // Assert
+        assert!(result.is_err());
+        assert_eq!(
+            result.expect_err("expecting an error"),
+            ConnectionDeactivationError::NotActive
         );
         assert_eq!(
             dbus_repo_mock.get_active_connections().iter().len(),
