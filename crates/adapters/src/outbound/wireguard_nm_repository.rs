@@ -34,13 +34,13 @@ impl InternalWireGuardConnection {
     }
 }
 
-/// Repository that handles WireGuard using D-Bus
-pub struct WireGuardDBusRepository {
+/// Repository that handles WireGuard using the NetworkManager
+pub struct WireGuardNmRepository {
     /// The system connection to the D-Bus on the operating system
     dbus_connection: Connection,
 }
 
-impl WireGuardDBusRepository {
+impl WireGuardNmRepository {
     /// Creates a new instance
     ///
     /// # Errors
@@ -50,9 +50,9 @@ impl WireGuardDBusRepository {
     /// # Examples
     ///
     /// ```
-    /// use adapters::outbound::wireguard_dbus_repository::WireGuardDBusRepository;
+    /// use adapters::outbound::wireguard_nm_repository::WireGuardNmRepository;
     ///
-    /// let _res = WireGuardDBusRepository::new();
+    /// let _res = WireGuardNmRepository::new();
     /// ```
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
         let dbus_connection = Connection::system()?;
@@ -104,7 +104,7 @@ impl WireGuardDBusRepository {
     }
 }
 
-impl WireGuardPort for WireGuardDBusRepository {
+impl WireGuardPort for WireGuardNmRepository {
     fn get_imported_connections(&self) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
         let internal_connections = self.get_imported_connections_internal().map_err(|err| {
             log::error!("error {} getting connections from D-Bus", err);

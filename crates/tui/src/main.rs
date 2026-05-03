@@ -1,4 +1,4 @@
-use adapters::{inbound::tui::App, outbound::wireguard_dbus_repository::WireGuardDBusRepository};
+use adapters::{inbound::tui::App, outbound::wireguard_nm_repository::WireGuardNmRepository};
 use application::{
     activate_connection_usecase::ActivateConnectionUsecase,
     deactivate_connection_usecase::DeactivateConnectionUsecase,
@@ -24,7 +24,7 @@ fn main() -> io::Result<()> {
     log::debug!("configured logger");
     // Build the dependencies
     let wireguard_dbus_adapter =
-        WireGuardDBusRepository::new().expect("could not connect to D-Bus");
+        WireGuardNmRepository::new().expect("could not connect to the NetworkManager interface");
     let list_connections_usecase = ListConnectionsUseCase::new(&wireguard_dbus_adapter);
     let activate_connection_usecase = ActivateConnectionUsecase::new(&wireguard_dbus_adapter);
     let deactivate_connection_usecase = DeactivateConnectionUsecase::new(&wireguard_dbus_adapter);
