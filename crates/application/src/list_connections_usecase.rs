@@ -49,8 +49,8 @@ mod list_connections_usecase_tests {
     fn returns_expected_empty_vec() {
         // Arrange
         #[derive(Default)]
-        struct WireGuardDbusRepoMock {}
-        impl WireGuardPort for WireGuardDbusRepoMock {
+        struct WireGuardNmRepoMock {}
+        impl WireGuardPort for WireGuardNmRepoMock {
             fn get_imported_connections(
                 &self,
             ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
@@ -66,7 +66,7 @@ mod list_connections_usecase_tests {
             }
         }
         // Act
-        let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
+        let result = ListConnectionsUseCase::new(&WireGuardNmRepoMock::default()).get();
         // Assert
         assert!(result.is_ok());
         let data = result.expect("expecting no error");
@@ -79,8 +79,8 @@ mod list_connections_usecase_tests {
     fn return_infra_error_correctly() {
         // Arrange
         #[derive(Default)]
-        struct WireGuardDbusRepoMock {}
-        impl WireGuardPort for WireGuardDbusRepoMock {
+        struct WireGuardNmRepoMock {}
+        impl WireGuardPort for WireGuardNmRepoMock {
             fn get_imported_connections(
                 &self,
             ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
@@ -96,7 +96,7 @@ mod list_connections_usecase_tests {
             }
         }
         // Act
-        let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
+        let result = ListConnectionsUseCase::new(&WireGuardNmRepoMock::default()).get();
         // Assert
         assert!(result.is_err_and(|x| x == ListConnectionError::Infra));
     }
@@ -106,8 +106,8 @@ mod list_connections_usecase_tests {
     fn returns_expected_items() {
         // Arrange
         #[derive(Default)]
-        struct WireGuardDbusRepoMock {}
-        impl WireGuardPort for WireGuardDbusRepoMock {
+        struct WireGuardNmRepoMock {}
+        impl WireGuardPort for WireGuardNmRepoMock {
             fn get_imported_connections(
                 &self,
             ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
@@ -138,7 +138,7 @@ mod list_connections_usecase_tests {
             WireGuardConnection::new("some-id-5".to_string(), false),
         ];
         // Act
-        let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
+        let result = ListConnectionsUseCase::new(&WireGuardNmRepoMock::default()).get();
         // Assert
         assert!(result.is_ok());
         let data = result.expect("expecting no error");
@@ -152,8 +152,8 @@ mod list_connections_usecase_tests {
     fn returns_items_sorted() {
         // Arrange
         #[derive(Default)]
-        struct WireGuardDbusRepoMock {}
-        impl WireGuardPort for WireGuardDbusRepoMock {
+        struct WireGuardNmRepoMock {}
+        impl WireGuardPort for WireGuardNmRepoMock {
             fn get_imported_connections(
                 &self,
             ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
@@ -184,7 +184,7 @@ mod list_connections_usecase_tests {
             WireGuardConnection::new("some-id-5".to_string(), false),
         ];
         // Act
-        let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
+        let result = ListConnectionsUseCase::new(&WireGuardNmRepoMock::default()).get();
         // Assert
         assert!(result.is_ok());
         let data = result.expect("expecting no error");

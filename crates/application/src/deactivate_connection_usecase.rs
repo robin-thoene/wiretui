@@ -84,11 +84,11 @@ mod deactivate_connection_usecase_tests {
     };
     use std::cell::RefCell;
 
-    struct WireGuardDbusRepoMock {
+    struct WireGuardNmRepoMock {
         available_connections: RefCell<Vec<WireGuardConnection>>,
     }
 
-    impl WireGuardDbusRepoMock {
+    impl WireGuardNmRepoMock {
         /// Initialize the mock implementation with a bunch of non-active connections
         /// and one that is currently marked as active
         pub fn init_conn_list_with_active() -> Self {
@@ -147,7 +147,7 @@ mod deactivate_connection_usecase_tests {
             }
         }
     }
-    impl WireGuardPort for WireGuardDbusRepoMock {
+    impl WireGuardPort for WireGuardNmRepoMock {
         fn get_imported_connections(
             &self,
         ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
@@ -173,7 +173,7 @@ mod deactivate_connection_usecase_tests {
     #[test]
     fn success_deactivate_active_connection() {
         // Arrange
-        let dbus_repo_mock = WireGuardDbusRepoMock::init_conn_list_with_active();
+        let dbus_repo_mock = WireGuardNmRepoMock::init_conn_list_with_active();
         let id_to_deactivate = "some-id-4";
         // Act
         let result = DeactivateConnectionUsecase::new(&dbus_repo_mock)
@@ -188,7 +188,7 @@ mod deactivate_connection_usecase_tests {
     #[test]
     fn success_deactivate_one_of_mulitple_active_connections() {
         // Arrange
-        let dbus_repo_mock = WireGuardDbusRepoMock::init_conn_list_with_multi_active();
+        let dbus_repo_mock = WireGuardNmRepoMock::init_conn_list_with_multi_active();
         let active_conn_count = dbus_repo_mock.get_active_connections().len();
         let id_to_deactivate = "some-id-4";
         // Act
@@ -218,7 +218,7 @@ mod deactivate_connection_usecase_tests {
     #[test]
     fn error_connection_to_deactivate_does_not_exist() {
         // Arrange
-        let dbus_repo_mock = WireGuardDbusRepoMock::init_conn_list_with_active();
+        let dbus_repo_mock = WireGuardNmRepoMock::init_conn_list_with_active();
         let active_conn_count = dbus_repo_mock.get_active_connections().len();
         let id_to_deactivate = "some-id-does-not-exist";
         // Act
@@ -241,7 +241,7 @@ mod deactivate_connection_usecase_tests {
     #[test]
     fn error_connection_to_deactivate_is_not_active() {
         // Arrange
-        let dbus_repo_mock = WireGuardDbusRepoMock::init_conn_list_with_active();
+        let dbus_repo_mock = WireGuardNmRepoMock::init_conn_list_with_active();
         let active_conn_count = dbus_repo_mock.get_active_connections().len();
         let id_to_deactivate = "some-id-1";
         // Act

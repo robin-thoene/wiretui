@@ -95,11 +95,11 @@ mod activate_connection_usecase_tests {
     };
     use std::cell::RefCell;
 
-    struct WireGuardDbusRepoMock {
+    struct WireGuardNmRepoMock {
         available_connections: RefCell<Vec<WireGuardConnection>>,
     }
 
-    impl WireGuardDbusRepoMock {
+    impl WireGuardNmRepoMock {
         /// Initialize the mock implementation with a single non-active connection
         pub fn init_single_conn() -> Self {
             Self {
@@ -180,7 +180,7 @@ mod activate_connection_usecase_tests {
             }
         }
     }
-    impl WireGuardPort for WireGuardDbusRepoMock {
+    impl WireGuardPort for WireGuardNmRepoMock {
         fn get_imported_connections(
             &self,
         ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
@@ -206,7 +206,7 @@ mod activate_connection_usecase_tests {
     #[test]
     fn success_single_available_connection() {
         // Arrange
-        let dbus_repo_mock = WireGuardDbusRepoMock::init_single_conn();
+        let dbus_repo_mock = WireGuardNmRepoMock::init_single_conn();
         let id_to_activate = "some-id";
         // Act
         let result = ActivateConnectionUsecase::new(&dbus_repo_mock)
@@ -236,7 +236,7 @@ mod activate_connection_usecase_tests {
     #[test]
     fn success_multiple_available_connection() {
         // Arrange
-        let dbus_repo_mock = WireGuardDbusRepoMock::init_conn_list();
+        let dbus_repo_mock = WireGuardNmRepoMock::init_conn_list();
         let id_to_activate = "some-id-4";
         // Act
         let result = ActivateConnectionUsecase::new(&dbus_repo_mock)
@@ -266,7 +266,7 @@ mod activate_connection_usecase_tests {
     #[test]
     fn success_currently_active_connection() {
         // Arrange
-        let dbus_repo_mock = WireGuardDbusRepoMock::init_conn_list_with_active();
+        let dbus_repo_mock = WireGuardNmRepoMock::init_conn_list_with_active();
         let id_to_activate = "some-id-2";
         // Act
         let result = ActivateConnectionUsecase::new(&dbus_repo_mock)
@@ -296,7 +296,7 @@ mod activate_connection_usecase_tests {
     #[test]
     fn success_currently_multiple_active_connections() {
         // Arrange
-        let dbus_repo_mock = WireGuardDbusRepoMock::init_conn_list_with_multi_active();
+        let dbus_repo_mock = WireGuardNmRepoMock::init_conn_list_with_multi_active();
         let id_to_activate = "some-id-2";
         // Act
         let result = ActivateConnectionUsecase::new(&dbus_repo_mock)
@@ -325,7 +325,7 @@ mod activate_connection_usecase_tests {
     #[test]
     fn error_connection_already_active() {
         // Arrange
-        let dbus_repo_mock = WireGuardDbusRepoMock::init_conn_list_with_active();
+        let dbus_repo_mock = WireGuardNmRepoMock::init_conn_list_with_active();
         let id_to_activate = "some-id-4";
         // Act
         let result = ActivateConnectionUsecase::new(&dbus_repo_mock)
@@ -353,7 +353,7 @@ mod activate_connection_usecase_tests {
     #[test]
     fn error_connection_to_activate_does_not_exist() {
         // Arrange
-        let dbus_repo_mock = WireGuardDbusRepoMock::init_conn_list();
+        let dbus_repo_mock = WireGuardNmRepoMock::init_conn_list();
         let id_to_activate = "some-id-does-not-exist";
         // Act
         let result = ActivateConnectionUsecase::new(&dbus_repo_mock)
