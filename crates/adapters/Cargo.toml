@@ -16,3 +16,4 @@ ratatui = { workspace = true }
 zbus = { workspace = true }
 serde = { workspace = true }
 log = { workspace = true }
+ratatui-textarea = { workspace = true }

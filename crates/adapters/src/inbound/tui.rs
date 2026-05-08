@@ -5,6 +5,7 @@ use crate::inbound::tui::custom_widgets::{
     connection_list::{ConnectionList, ConnectionListState},
     keymaps_popup::KeymapsPopup,
     status_bar::StatusBar,
+    user_input_popup::UserInputPopup,
 };
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use domain::models::WireGuardConnection;
@@ -30,6 +31,7 @@ where
     I: ImportConnectionPort,
 {
     show_help: bool,
+    show_import_popup: bool,
     exit: bool,
     connections: Connections,
     list_connections_port: L,
@@ -59,6 +61,7 @@ where
     ) -> Self {
         Self {
             show_help: bool::default(),
+            show_import_popup: bool::default(),
             exit: bool::default(),
             connections: Connections::default(),
             list_connections_port,
@@ -155,6 +158,7 @@ where
                 .list_state
                 .select_previous(),
             KeyCode::Char(' ') => self.toggle_selected_connection(),
+            KeyCode::Char('i') if !self.show_import_popup => self.open_import_popup(),
             _ => {}
         }
     }
@@ -167,6 +171,11 @@ where
     /// Open the help menu i.e. the keymaps popup
     fn open_help(&mut self) {
         self.show_help = true;
+    }
+
+    /// Open the popup to get the user input for importing new connections
+    fn open_import_popup(&mut self) {
+        self.show_import_popup = true;
     }
 
     /// Close the help menu i.e. the keymaps popup
@@ -237,6 +246,11 @@ where
         if self.show_help {
             let help_popup = KeymapsPopup {};
             help_popup.render(area, buf);
+        }
+
+        if self.show_import_popup {
+            let import_popup = UserInputPopup {};
+            import_popup.render(area, buf);
         }
     }
 }
