@@ -5,9 +5,10 @@ use crate::outbound::dbus_repository::{
 };
 use domain::models::WireGuardConnection;
 use ports::outbound::wireguard_port::{
-    ConnectionActivationError, ConnectionDeactivationError, ConnectionNotFoundError,
-    GetConnectionsError, InfrastructureError, WireGuardPort,
+    ConnectionActivationError, ConnectionDeactivationError, ConnectionImportError,
+    ConnectionNotFoundError, GetConnectionsError, InfrastructureError, WireGuardPort,
 };
+use std::path::PathBuf;
 use zbus::{blocking::Connection, zvariant::OwnedObjectPath};
 
 /// Internal representation of a single WireGuard connection
@@ -196,5 +197,14 @@ impl WireGuardPort for WireGuardNmRepository {
                 ConnectionNotFoundError,
             ))
         }
+    }
+
+    fn import_from_file(&self, file_path: PathBuf) -> Result<(), ConnectionImportError> {
+        // TODO: do the thing
+        log::info!(
+            "TODO: import connection from path {}",
+            file_path.to_str().expect("expect for debugging")
+        );
+        Ok(())
     }
 }

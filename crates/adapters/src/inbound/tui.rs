@@ -11,7 +11,7 @@ use domain::models::WireGuardConnection;
 use ports::inbound::{
     activate_connection_port::ActivateConnectionPort,
     deactivate_connection_port::DeactivateConnectionPort,
-    list_connections_port::ListConnectionsPort,
+    import_connection_port::ImportConnectionPort, list_connections_port::ListConnectionsPort,
 };
 use ratatui::{
     Frame,
@@ -22,11 +22,12 @@ use ratatui::{
 use std::io;
 
 #[derive(Debug)]
-pub struct App<L, A, D>
+pub struct App<L, A, D, I>
 where
     L: ListConnectionsPort,
     A: ActivateConnectionPort,
     D: DeactivateConnectionPort,
+    I: ImportConnectionPort,
 {
     show_help: bool,
     exit: bool,
@@ -34,6 +35,7 @@ where
     list_connections_port: L,
     activate_connection_port: A,
     deactivate_connection_port: D,
+    _import_connection_port: I,
 }
 
 #[derive(Debug, Default)]
@@ -42,16 +44,18 @@ struct Connections {
     connection_list_state: ConnectionListState,
 }
 
-impl<L, A, D> App<L, A, D>
+impl<L, A, D, I> App<L, A, D, I>
 where
     L: ListConnectionsPort,
     A: ActivateConnectionPort,
     D: DeactivateConnectionPort,
+    I: ImportConnectionPort,
 {
     pub fn new(
         list_connections_port: L,
         activate_connection_port: A,
         deactivate_connection_port: D,
+        import_connection_port: I,
     ) -> Self {
         Self {
             show_help: bool::default(),
@@ -60,6 +64,7 @@ where
             list_connections_port,
             activate_connection_port,
             deactivate_connection_port,
+            _import_connection_port: import_connection_port,
         }
     }
 
@@ -203,11 +208,12 @@ where
     }
 }
 
-impl<L, A, D> Widget for &mut App<L, A, D>
+impl<L, A, D, I> Widget for &mut App<L, A, D, I>
 where
     L: ListConnectionsPort,
     A: ActivateConnectionPort,
     D: DeactivateConnectionPort,
+    I: ImportConnectionPort,
 {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let main_layout = Layout::default()

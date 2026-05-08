@@ -42,6 +42,7 @@ mod list_connections_usecase_tests {
         ConnectionActivationError, ConnectionDeactivationError, GetConnectionsError,
         InfrastructureError,
     };
+    use std::path::PathBuf;
 
     /// Ensures that the use case returns an empty vec if the WireGuardPort returns an empty one
     /// as well
@@ -62,6 +63,13 @@ mod list_connections_usecase_tests {
             }
 
             fn deactivate_connection(&self, _id: &str) -> Result<(), ConnectionDeactivationError> {
+                Ok(())
+            }
+
+            fn import_from_file(
+                &self,
+                _file_path: PathBuf,
+            ) -> Result<(), ports::outbound::wireguard_port::ConnectionImportError> {
                 Ok(())
             }
         }
@@ -92,6 +100,13 @@ mod list_connections_usecase_tests {
             }
 
             fn deactivate_connection(&self, _id: &str) -> Result<(), ConnectionDeactivationError> {
+                Ok(())
+            }
+
+            fn import_from_file(
+                &self,
+                _file_path: PathBuf,
+            ) -> Result<(), ports::outbound::wireguard_port::ConnectionImportError> {
                 Ok(())
             }
         }
@@ -126,6 +141,13 @@ mod list_connections_usecase_tests {
             }
 
             fn deactivate_connection(&self, _id: &str) -> Result<(), ConnectionDeactivationError> {
+                Ok(())
+            }
+
+            fn import_from_file(
+                &self,
+                _file_path: PathBuf,
+            ) -> Result<(), ports::outbound::wireguard_port::ConnectionImportError> {
                 Ok(())
             }
         }
@@ -172,6 +194,13 @@ mod list_connections_usecase_tests {
             }
 
             fn deactivate_connection(&self, _id: &str) -> Result<(), ConnectionDeactivationError> {
+                Ok(())
+            }
+
+            fn import_from_file(
+                &self,
+                _file_path: PathBuf,
+            ) -> Result<(), ports::outbound::wireguard_port::ConnectionImportError> {
                 Ok(())
             }
         }

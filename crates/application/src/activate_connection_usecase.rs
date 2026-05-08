@@ -93,7 +93,7 @@ mod activate_connection_usecase_tests {
         ConnectionActivationError as AdapterConnectionActivationError,
         ConnectionDeactivationError as AdapterConnectionDeactivationError, GetConnectionsError,
     };
-    use std::cell::RefCell;
+    use std::{cell::RefCell, path::PathBuf};
 
     struct WireGuardNmRepoMock {
         available_connections: RefCell<Vec<WireGuardConnection>>,
@@ -200,29 +200,36 @@ mod activate_connection_usecase_tests {
             self.set_internal_conn_state(id, false);
             Ok(())
         }
+
+        fn import_from_file(
+            &self,
+            _file_path: PathBuf,
+        ) -> Result<(), ports::outbound::wireguard_port::ConnectionImportError> {
+            Ok(())
+        }
     }
 
     /// Ensures that activating a single imported connection that not yet is active works
     #[test]
     fn success_single_available_connection() {
         // Arrange
-        let dbus_repo_mock = WireGuardNmRepoMock::init_single_conn();
+        let wg_repo_mock = WireGuardNmRepoMock::init_single_conn();
         let id_to_activate = "some-id";
         // Act
-        let result = ActivateConnectionUsecase::new(&dbus_repo_mock)
+        let result = ActivateConnectionUsecase::new(&wg_repo_mock)
             .activate(&WireGuardConnection::new(id_to_activate.into(), false));
         // Assert
         assert!(result.is_ok());
-        assert_eq!(dbus_repo_mock.get_active_connections().iter().len(), 1);
+        assert_eq!(wg_repo_mock.get_active_connections().iter().len(), 1);
         assert!(
-            dbus_repo_mock
+            wg_repo_mock
                 .get_active_connections()
                 .first()
                 .expect("a single active connection exists here")
                 .get_is_active(),
         );
         assert_eq!(
-            dbus_repo_mock
+            wg_repo_mock
                 .get_active_connections()
                 .first()
                 .expect("a single active connection exists here")
@@ -236,23 +243,23 @@ mod activate_connection_usecase_tests {
     #[test]
     fn success_multiple_available_connection() {
         // Arrange
-        let dbus_repo_mock = WireGuardNmRepoMock::init_conn_list();
+        let repo_mock = WireGuardNmRepoMock::init_conn_list();
         let id_to_activate = "some-id-4";
         // Act
-        let result = ActivateConnectionUsecase::new(&dbus_repo_mock)
+        let result = ActivateConnectionUsecase::new(&repo_mock)
             .activate(&WireGuardConnection::new(id_to_activate.into(), false));
         // Assert
         assert!(result.is_ok());
-        assert_eq!(dbus_repo_mock.get_active_connections().iter().len(), 1);
+        assert_eq!(repo_mock.get_active_connections().iter().len(), 1);
         assert!(
-            dbus_repo_mock
+            repo_mock
                 .get_active_connections()
                 .first()
                 .expect("a single active connection exists here")
                 .get_is_active(),
         );
         assert_eq!(
-            dbus_repo_mock
+            repo_mock
                 .get_active_connections()
                 .first()
                 .expect("a single active connection exists here")
@@ -266,23 +273,23 @@ mod activate_connection_usecase_tests {
     #[test]
     fn success_currently_active_connection() {
         // Arrange
-        let dbus_repo_mock = WireGuardNmRepoMock::init_conn_list_with_active();
+        let repo_mock = WireGuardNmRepoMock::init_conn_list_with_active();
         let id_to_activate = "some-id-2";
         // Act
-        let result = ActivateConnectionUsecase::new(&dbus_repo_mock)
+        let result = ActivateConnectionUsecase::new(&repo_mock)
             .activate(&WireGuardConnection::new(id_to_activate.into(), false));
         // Assert
         assert!(result.is_ok());
-        assert_eq!(dbus_repo_mock.get_active_connections().iter().len(), 1);
+        assert_eq!(repo_mock.get_active_connections().iter().len(), 1);
         assert!(
-            dbus_repo_mock
+            repo_mock
                 .get_active_connections()
                 .first()
                 .expect("a single active connection exists here")
                 .get_is_active(),
         );
         assert_eq!(
-            dbus_repo_mock
+            repo_mock
                 .get_active_connections()
                 .first()
                 .expect("a single active connection exists here")
@@ -296,23 +303,23 @@ mod activate_connection_usecase_tests {
     #[test]
     fn success_currently_multiple_active_connections() {
         // Arrange
-        let dbus_repo_mock = WireGuardNmRepoMock::init_conn_list_with_multi_active();
+        let repo_mock = WireGuardNmRepoMock::init_conn_list_with_multi_active();
         let id_to_activate = "some-id-2";
         // Act
-        let result = ActivateConnectionUsecase::new(&dbus_repo_mock)
+        let result = ActivateConnectionUsecase::new(&repo_mock)
             .activate(&WireGuardConnection::new(id_to_activate.into(), false));
         // Assert
         assert!(result.is_ok());
-        assert_eq!(dbus_repo_mock.get_active_connections().iter().len(), 1);
+        assert_eq!(repo_mock.get_active_connections().iter().len(), 1);
         assert!(
-            dbus_repo_mock
+            repo_mock
                 .get_active_connections()
                 .first()
                 .expect("a single active connection exists here")
                 .get_is_active(),
         );
         assert_eq!(
-            dbus_repo_mock
+            repo_mock
                 .get_active_connections()
                 .first()
                 .expect("a single active connection exists here")
@@ -325,10 +332,10 @@ mod activate_connection_usecase_tests {
     #[test]
     fn error_connection_already_active() {
         // Arrange
-        let dbus_repo_mock = WireGuardNmRepoMock::init_conn_list_with_active();
+        let repo_mock = WireGuardNmRepoMock::init_conn_list_with_active();
         let id_to_activate = "some-id-4";
         // Act
-        let result = ActivateConnectionUsecase::new(&dbus_repo_mock)
+        let result = ActivateConnectionUsecase::new(&repo_mock)
             .activate(&WireGuardConnection::new(id_to_activate.into(), false));
         // Assert
         assert!(result.is_err());
@@ -339,7 +346,7 @@ mod activate_connection_usecase_tests {
         // The connections was already active and is expected to stay active even after this
         // error
         assert_eq!(
-            dbus_repo_mock
+            repo_mock
                 .get_active_connections()
                 .first()
                 .expect("a single active connection exists here")
@@ -353,10 +360,10 @@ mod activate_connection_usecase_tests {
     #[test]
     fn error_connection_to_activate_does_not_exist() {
         // Arrange
-        let dbus_repo_mock = WireGuardNmRepoMock::init_conn_list();
+        let repo_mock = WireGuardNmRepoMock::init_conn_list();
         let id_to_activate = "some-id-does-not-exist";
         // Act
-        let result = ActivateConnectionUsecase::new(&dbus_repo_mock)
+        let result = ActivateConnectionUsecase::new(&repo_mock)
             .activate(&WireGuardConnection::new(id_to_activate.into(), false));
         // Assert
         assert!(result.is_err());

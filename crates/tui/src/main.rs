@@ -2,6 +2,7 @@ use adapters::{inbound::tui::App, outbound::wireguard_nm_repository::WireGuardNm
 use application::{
     activate_connection_usecase::ActivateConnectionUsecase,
     deactivate_connection_usecase::DeactivateConnectionUsecase,
+    import_connection_usecase::ImportConnectionUsecase,
     list_connections_usecase::ListConnectionsUseCase,
 };
 use env_logger::{Builder, Env, Target};
@@ -28,12 +29,14 @@ fn main() -> io::Result<()> {
     let list_connections_usecase = ListConnectionsUseCase::new(&wireguard_dbus_adapter);
     let activate_connection_usecase = ActivateConnectionUsecase::new(&wireguard_dbus_adapter);
     let deactivate_connection_usecase = DeactivateConnectionUsecase::new(&wireguard_dbus_adapter);
+    let import_connection_usecase = ImportConnectionUsecase::new(&wireguard_dbus_adapter);
     log::debug!("built the dependencies");
     // Build and run the TUI application
     let mut tui_app = App::new(
         list_connections_usecase,
         activate_connection_usecase,
         deactivate_connection_usecase,
+        import_connection_usecase,
     );
     log::debug!("created the TUI application");
     log::info!("running TUI application ...");

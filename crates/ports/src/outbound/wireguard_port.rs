@@ -2,6 +2,7 @@ use domain::models::WireGuardConnection;
 use std::{
     error::Error,
     fmt::{self},
+    path::PathBuf,
 };
 
 /// Must be implemented by adapters handling WireGuard
@@ -46,6 +47,32 @@ pub trait WireGuardPort {
     /// - infrastructure failure while attempting to deactivate the connection
     /// - logical error (for example connection with id does not exist)
     fn deactivate_connection(&self, id: &str) -> Result<(), ConnectionDeactivationError>;
+
+    /// Imports a single connection from a config file
+    ///
+    /// # Arguments
+    ///
+    /// * `file_path` - The path to the config file
+    ///
+    /// # Errors
+    ///
+    /// A new connection can not be created from the provided config file, a custom error is
+    /// returned.
+    fn import_from_file(&self, file_path: PathBuf) -> Result<(), ConnectionImportError>;
+}
+
+#[derive(Debug)]
+pub enum ConnectionImportError {
+    /// Error while connecting to the infrastructure that is used to import connections
+    Infrastructure(InfrastructureError),
+    /// The file to import the connection from can not be found
+    FileNotFound,
+}
+impl Error for ConnectionImportError {}
+impl fmt::Display for ConnectionImportError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "error while importing the connection")
+    }
 }
 
 /// Error that occurs when trying to connect with the infrastructure used to manage the network
