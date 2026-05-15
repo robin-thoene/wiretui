@@ -140,31 +140,8 @@ where
         if self.show_import_popup {
             match key_event.code {
                 KeyCode::Esc => self.close_import_popup(),
-                KeyCode::Enter => {
-                    // Get the current input from the user
-                    let user_input = self.import_popup.get_text();
-                    if let Some(user_input) = user_input {
-                        if user_input.trim().is_empty() {
-                            log::warn!("user entered empty or whitespace, skipping");
-                        } else {
-                            log::debug!(
-                                "user input for importing a connection from config file: {}",
-                                user_input
-                            );
-                            // Try to import a new connection from the given file path
-                            let _ = self.import_connection_port.import_from_file(user_input);
-                        }
-                    } else {
-                        log::warn!(
-                            "
-                            user did not input a value for the path to a config file to import a 
-                            new connection
-                            "
-                        )
-                    }
-                    // Close the popup
-                    self.close_import_popup();
-                }
+                KeyCode::Enter => self.import_new_connection(),
+
                 _ => {
                     // Let the popup handle the key event
                     self.import_popup.handle_key_event(key_event);
@@ -232,7 +209,47 @@ where
         self.import_popup.clear();
     }
 
-    /// Toggles the selected connection. If it is active, deactivate it and vice versa
+    /// Refresh the list of all connection and it's states
+    fn refresh_connection_list(&mut self) {
+        // TODO: use a more optimal way to mark successful activated conn as active
+        let connections_result = self.list_connections_port.get();
+        if let Ok(conn) = connections_result {
+            self.connections.value = conn;
+        } else {
+            // TODO: display error in UI
+        }
+    }
+
+    /// Import a new connection
+    fn import_new_connection(&mut self) {
+        // Get the current input from the user
+        let user_input = self.import_popup.get_text();
+        if let Some(user_input) = user_input {
+            if user_input.trim().is_empty() {
+                log::warn!("user entered empty or whitespace, skipping");
+            } else {
+                log::debug!(
+                    "user input for importing a connection from config file: {}",
+                    user_input
+                );
+                // Try to import a new connection from the given file path
+                let result = self.import_connection_port.import_from_file(user_input);
+                match result {
+                    Ok(_) => self.refresh_connection_list(),
+                    Err(err) => {
+                        log::error!("error occurred while importing the connection: {}", err)
+                    }
+                }
+            }
+        } else {
+            log::warn!(
+                "user did not input a value for the path to a config file to import a new connection"
+            )
+        }
+        self.close_import_popup();
+    }
+
+    /// Toggle the selected connection. If it is active, deactivate it and vice versa
     fn toggle_selected_connection(&mut self) {
         let idx = self.connections.connection_list_state.list_state.selected();
         if let Some(idx) = idx {
@@ -253,14 +270,7 @@ where
                         // TODO: display error in UI
                     }
                 }
-                // Refresh the connection list
-                // TODO: use a more optimal way to mark successful activated conn as active
-                let connections_result = self.list_connections_port.get();
-                if let Ok(conn) = connections_result {
-                    self.connections.value = conn;
-                } else {
-                    // TODO: display error in UI
-                }
+                self.refresh_connection_list();
             }
         }
     }
