@@ -240,16 +240,16 @@ where
             &mut self.connections.connection_list_state,
         );
 
-        let status_bar = StatusBar {};
+        let status_bar = StatusBar::default();
         status_bar.render(main_layout[1], buf);
 
         if self.show_help {
-            let help_popup = KeymapsPopup {};
+            let help_popup = KeymapsPopup::default();
             help_popup.render(area, buf);
         }
 
         if self.show_import_popup {
-            let import_popup = UserInputPopup {};
+            let import_popup = UserInputPopup::default();
             import_popup.render(area, buf);
         }
     }

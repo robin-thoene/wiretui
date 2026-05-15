@@ -6,6 +6,7 @@ use ratatui::{
 };
 
 /// Popup that displays all available keymaps for the entire application
+#[derive(Default)]
 pub struct KeymapsPopup {}
 
 impl Widget for KeymapsPopup {

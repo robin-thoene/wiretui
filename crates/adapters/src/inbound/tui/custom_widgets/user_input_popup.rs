@@ -6,6 +6,7 @@ use ratatui::{
 use ratatui_textarea::TextArea;
 
 /// Popup to get a text input from the user
+#[derive(Debug, Default)]
 pub struct UserInputPopup {}
 
 impl Widget for UserInputPopup {
