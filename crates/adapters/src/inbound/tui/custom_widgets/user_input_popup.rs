@@ -1,3 +1,4 @@
+use crossterm::event::KeyEvent;
 use ratatui::{
     layout::{Constraint, Flex, Layout, Rect},
     style::Style,
@@ -7,19 +8,43 @@ use ratatui_textarea::TextArea;
 
 /// Popup to get a text input from the user
 #[derive(Debug, Default)]
-pub struct UserInputPopup {}
+pub struct UserInputPopup<'a> {
+    textarea: TextArea<'a>,
+}
 
-impl Widget for UserInputPopup {
+impl<'a> UserInputPopup<'a> {
+    /// Handles user key events
+    pub fn handle_key_event(&mut self, key_event: KeyEvent) {
+        log::debug!(
+            "handling key event '{}' in user input popup",
+            key_event.code
+        );
+        self.textarea.input(key_event);
+    }
+
+    /// Clears the current value within the text area
+    pub fn clear(&mut self) {
+        self.textarea.clear();
+    }
+
+    /// Returns the current text value within the text area (the first row)
+    pub fn get_text(&self) -> Option<&String> {
+        self.textarea.lines().first()
+    }
+}
+
+impl<'a> Widget for &mut UserInputPopup<'a> {
     fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
     where
         Self: Sized,
     {
         let area = popup_area(area);
-        let mut textarea = TextArea::default();
-        textarea.set_block(Block::default().borders(Borders::ALL));
-        textarea.set_cursor_line_style(Style::default());
-        textarea.set_placeholder_text("Enter the path to your config file to import ...");
-        textarea.render(area, buf);
+        self.textarea
+            .set_block(Block::default().borders(Borders::ALL));
+        self.textarea.set_cursor_line_style(Style::default());
+        self.textarea
+            .set_placeholder_text("Enter the path to your config file to import ...");
+        self.textarea.render(area, buf);
     }
 }
 

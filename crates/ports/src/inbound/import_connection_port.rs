@@ -1,4 +1,4 @@
-use std::{error::Error, fmt, path::PathBuf};
+use std::{error::Error, fmt};
 
 /// Defines the inbound port to import new connections
 pub trait ImportConnectionPort {
@@ -14,7 +14,7 @@ pub trait ImportConnectionPort {
     /// - an error on the underlying infrastructure
     /// - the file does not exist
     /// - the file does not contain a valid WireGuard configuration
-    fn import_from_file(&self, file_path: PathBuf) -> Result<(), ConnectionImportError>;
+    fn import_from_file(&self, file_path: &str) -> Result<(), ConnectionImportError>;
 }
 
 #[derive(Debug)]

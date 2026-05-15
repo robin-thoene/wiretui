@@ -26,10 +26,10 @@ impl<'a, W> ImportConnectionPort for ImportConnectionUsecase<'a, W>
 where
     W: WireGuardPort,
 {
-    fn import_from_file(&self, file_path: PathBuf) -> Result<(), ConnectionImportError> {
+    fn import_from_file(&self, file_path: &str) -> Result<(), ConnectionImportError> {
         // TODO: validate file_path
         self.wireguard_port
-            .import_from_file(file_path)
+            .import_from_file(PathBuf::from(file_path))
             .map_err(|_err| ConnectionImportError::Infra)?;
         Ok(())
     }

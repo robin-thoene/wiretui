@@ -23,7 +23,7 @@ use ratatui::{
 use std::io;
 
 #[derive(Debug)]
-pub struct App<L, A, D, I>
+pub struct App<'a, L, A, D, I>
 where
     L: ListConnectionsPort,
     A: ActivateConnectionPort,
@@ -34,10 +34,11 @@ where
     show_import_popup: bool,
     exit: bool,
     connections: Connections,
+    import_popup: UserInputPopup<'a>,
     list_connections_port: L,
     activate_connection_port: A,
     deactivate_connection_port: D,
-    _import_connection_port: I,
+    import_connection_port: I,
 }
 
 #[derive(Debug, Default)]
@@ -46,7 +47,7 @@ struct Connections {
     connection_list_state: ConnectionListState,
 }
 
-impl<L, A, D, I> App<L, A, D, I>
+impl<'a, L, A, D, I> App<'a, L, A, D, I>
 where
     L: ListConnectionsPort,
     A: ActivateConnectionPort,
@@ -64,10 +65,11 @@ where
             show_import_popup: bool::default(),
             exit: bool::default(),
             connections: Connections::default(),
+            import_popup: UserInputPopup::default(),
             list_connections_port,
             activate_connection_port,
             deactivate_connection_port,
-            _import_connection_port: import_connection_port,
+            import_connection_port,
         }
     }
 
@@ -134,6 +136,42 @@ where
     ///
     /// * `key_event` - The received key event
     fn handle_key_event(&mut self, key_event: KeyEvent) {
+        log::debug!("user pressed '{}'", key_event.code);
+        if self.show_import_popup {
+            match key_event.code {
+                KeyCode::Esc => self.close_import_popup(),
+                KeyCode::Enter => {
+                    // Get the current input from the user
+                    let user_input = self.import_popup.get_text();
+                    if let Some(user_input) = user_input {
+                        if user_input.trim().is_empty() {
+                            log::warn!("user entered empty or whitespace, skipping");
+                        } else {
+                            log::debug!(
+                                "user input for importing a connection from config file: {}",
+                                user_input
+                            );
+                            // Try to import a new connection from the given file path
+                            let _ = self.import_connection_port.import_from_file(user_input);
+                        }
+                    } else {
+                        log::warn!(
+                            "
+                            user did not input a value for the path to a config file to import a 
+                            new connection
+                            "
+                        )
+                    }
+                    // Close the popup
+                    self.close_import_popup();
+                }
+                _ => {
+                    // Let the popup handle the key event
+                    self.import_popup.handle_key_event(key_event);
+                }
+            }
+            return;
+        }
         // Make sure that quitting the application is always possible
         if key_event.code == KeyCode::Char('q') {
             self.exit();
@@ -165,22 +203,33 @@ where
 
     /// Close the application
     fn exit(&mut self) {
+        log::info!("triggering application shutdown");
         self.exit = true;
     }
 
     /// Open the help menu i.e. the keymaps popup
     fn open_help(&mut self) {
+        log::info!("showing the help menu");
         self.show_help = true;
-    }
-
-    /// Open the popup to get the user input for importing new connections
-    fn open_import_popup(&mut self) {
-        self.show_import_popup = true;
     }
 
     /// Close the help menu i.e. the keymaps popup
     fn close_help(&mut self) {
+        log::info!("closing the help menu");
         self.show_help = false
+    }
+
+    /// Open the popup to get the user input for importing new connections
+    fn open_import_popup(&mut self) {
+        log::info!("showing the import popup");
+        self.show_import_popup = true;
+    }
+
+    /// Close the popup to get the user input for importing new connections
+    fn close_import_popup(&mut self) {
+        log::info!("closing the import popup");
+        self.show_import_popup = false;
+        self.import_popup.clear();
     }
 
     /// Toggles the selected connection. If it is active, deactivate it and vice versa
@@ -217,7 +266,7 @@ where
     }
 }
 
-impl<L, A, D, I> Widget for &mut App<L, A, D, I>
+impl<'a, L, A, D, I> Widget for &mut App<'a, L, A, D, I>
 where
     L: ListConnectionsPort,
     A: ActivateConnectionPort,
@@ -249,8 +298,7 @@ where
         }
 
         if self.show_import_popup {
-            let import_popup = UserInputPopup::default();
-            import_popup.render(area, buf);
+            self.import_popup.render(area, buf);
         }
     }
 }
