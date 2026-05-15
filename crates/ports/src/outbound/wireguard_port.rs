@@ -52,13 +52,13 @@ pub trait WireGuardPort {
     ///
     /// # Arguments
     ///
-    /// * `file_path` - The path to the config file
+    /// * `config_file_path` - The path to the config file
     ///
     /// # Errors
     ///
     /// A new connection can not be created from the provided config file, a custom error is
     /// returned.
-    fn import_from_file(&self, file_path: PathBuf) -> Result<(), ConnectionImportError>;
+    fn import_from_file(&self, config_file_path: PathBuf) -> Result<(), ConnectionImportError>;
 }
 
 #[derive(Debug)]

@@ -202,11 +202,14 @@ impl WireGuardPort for WireGuardNmRepository {
         }
     }
 
-    fn import_from_file(&self, file_path: PathBuf) -> Result<(), ConnectionImportError> {
+    fn import_from_file(&self, config_file_path: PathBuf) -> Result<(), ConnectionImportError> {
         log::info!(
             "importing connection from path {}",
-            file_path.to_str().expect("expect for debugging")
+            config_file_path.to_str().expect("expect for debugging")
         );
+        if !config_file_path.exists() {
+            return Err(ConnectionImportError::FileNotFound);
+        }
         // TODO: replace this by a proper call to the dbus
         let import_status = Command::new("nmcli")
             .arg("connection")
@@ -215,7 +218,7 @@ impl WireGuardPort for WireGuardNmRepository {
             .arg("wireguard")
             .arg("file")
             .arg(
-                file_path
+                config_file_path
                     .to_str()
                     .expect("expect the file path to be converted to str"),
             )

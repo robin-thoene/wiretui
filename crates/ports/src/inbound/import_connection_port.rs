@@ -6,7 +6,7 @@ pub trait ImportConnectionPort {
     ///
     /// # Arguments
     ///
-    /// * `file_path` - The path to the config file on the Filesystem
+    /// * `config_file_path` - The path to the config file on the Filesystem
     ///
     /// # Errors
     ///
@@ -14,10 +14,10 @@ pub trait ImportConnectionPort {
     /// - an error on the underlying infrastructure
     /// - the file does not exist
     /// - the file does not contain a valid WireGuard configuration
-    fn import_from_file(&self, file_path: &str) -> Result<(), ConnectionImportError>;
+    fn import_from_file(&self, config_file_path: &str) -> Result<(), ConnectionImportError>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ConnectionImportError {
     Infra,
     FileNotFound,

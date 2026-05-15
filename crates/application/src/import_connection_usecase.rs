@@ -1,9 +1,8 @@
-use std::path::PathBuf;
-
 use ports::{
     inbound::import_connection_port::{ConnectionImportError, ImportConnectionPort},
     outbound::wireguard_port::WireGuardPort,
 };
+use std::path::PathBuf;
 
 /// Use case for importing new WireGuard connections
 pub struct ImportConnectionUsecase<'a, W>
@@ -26,10 +25,13 @@ impl<'a, W> ImportConnectionPort for ImportConnectionUsecase<'a, W>
 where
     W: WireGuardPort,
 {
-    fn import_from_file(&self, file_path: &str) -> Result<(), ConnectionImportError> {
-        // TODO: validate file_path
+    fn import_from_file(&self, config_file_path: &str) -> Result<(), ConnectionImportError> {
+        let config_file_path = PathBuf::from(config_file_path);
+        if !config_file_path.exists() {
+            return Err(ConnectionImportError::FileNotFound);
+        }
         self.wireguard_port
-            .import_from_file(PathBuf::from(file_path))
+            .import_from_file(config_file_path)
             .map_err(|_err| ConnectionImportError::Infra)?;
         Ok(())
     }
@@ -103,8 +105,21 @@ mod import_connection_usecase_tests {
         let repo_mock = WireGuardNmRepoMock::default();
         let use_case = ImportConnectionUsecase::new(&repo_mock);
         // Act
-        let result = use_case.import_from_file("todo".into());
+        let result = use_case.import_from_file("todo");
         // Assert
         assert!(result.is_ok())
+    }
+
+    /// Test that ensures an import attempt fails with the expected error if the provided config
+    /// file does not exist
+    #[test]
+    fn error_config_file_does_not_exist() {
+        // Arrange
+        let repo_mock = WireGuardNmRepoMock::default();
+        let use_case = ImportConnectionUsecase::new(&repo_mock);
+        // Act
+        let result = use_case.import_from_file("non-existing-file-path/non-existing-file.conf");
+        // Assert
+        assert!(result.is_err_and(|err| err == ConnectionImportError::FileNotFound));
     }
 }
