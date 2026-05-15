@@ -8,7 +8,10 @@ use ports::outbound::wireguard_port::{
     ConnectionActivationError, ConnectionDeactivationError, ConnectionImportError,
     ConnectionNotFoundError, GetConnectionsError, InfrastructureError, WireGuardPort,
 };
-use std::path::PathBuf;
+use std::{
+    path::PathBuf,
+    process::{Command, Stdio},
+};
 use zbus::{blocking::Connection, zvariant::OwnedObjectPath};
 
 /// Internal representation of a single WireGuard connection
@@ -200,11 +203,39 @@ impl WireGuardPort for WireGuardNmRepository {
     }
 
     fn import_from_file(&self, file_path: PathBuf) -> Result<(), ConnectionImportError> {
-        // TODO: do the thing
         log::info!(
-            "TODO: import connection from path {}",
+            "importing connection from path {}",
             file_path.to_str().expect("expect for debugging")
         );
-        Ok(())
+        // TODO: replace this by a proper call to the dbus
+        let import_status = Command::new("nmcli")
+            .arg("connection")
+            .arg("import")
+            .arg("type")
+            .arg("wireguard")
+            .arg("file")
+            .arg(
+                file_path
+                    .to_str()
+                    .expect("expect the file path to be converted to str"),
+            )
+            .stderr(Stdio::null())
+            .stdout(Stdio::null())
+            .status();
+        match import_status {
+            Ok(res) => {
+                if res.success() {
+                    log::info!("imported the new connection");
+                    Ok(())
+                } else {
+                    log::error!("failed to import the connection: {}", res);
+                    Err(ConnectionImportError::Infrastructure(InfrastructureError))
+                }
+            }
+            Err(err) => {
+                log::error!("failed to import the connection: {}", err);
+                Err(ConnectionImportError::Infrastructure(InfrastructureError))
+            }
+        }
     }
 }
