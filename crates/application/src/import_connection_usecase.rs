@@ -102,10 +102,14 @@ mod import_connection_usecase_tests {
     #[test]
     fn success_import_connection_from_conf_file() {
         // Arrange
+        let test_file_path = format!(
+            "{}/tests/data/mock_valid_wg.conf",
+            env!("CARGO_MANIFEST_DIR")
+        );
         let repo_mock = WireGuardNmRepoMock::default();
         let use_case = ImportConnectionUsecase::new(&repo_mock);
         // Act
-        let result = use_case.import_from_file("todo");
+        let result = use_case.import_from_file(&test_file_path);
         // Assert
         assert!(result.is_ok())
     }
