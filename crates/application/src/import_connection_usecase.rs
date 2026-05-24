@@ -33,7 +33,8 @@ where
             return Err(ConnectionImportError::FileNotFound);
         }
         // TODO: validate the content of the conf file to verify it is a wireguard config
-        self.wireguard_port
+        let id = self
+            .wireguard_port
             .import_from_file(config_file_path)
             .map_err(|err| match err {
                 AdapterConnectionImportError::Infrastructure(_infrastructure_error) => {
@@ -41,7 +42,11 @@ where
                 }
                 AdapterConnectionImportError::FileNotFound => ConnectionImportError::FileNotFound,
             })?;
-        Ok(())
+        let deactivation_result = self.wireguard_port.deactivate_connection(&id);
+        match deactivation_result {
+            Ok(_) => Ok(()),
+            Err(_) => Err(ConnectionImportError::Infra),
+        }
     }
 }
 
@@ -105,7 +110,7 @@ mod import_connection_usecase_tests {
         fn import_from_file(
             &self,
             file_path: PathBuf,
-        ) -> Result<(), ports::outbound::wireguard_port::ConnectionImportError> {
+        ) -> Result<String, ports::outbound::wireguard_port::ConnectionImportError> {
             let id = file_path
                 .iter()
                 .next_back()
@@ -116,7 +121,7 @@ mod import_connection_usecase_tests {
                 .next()
                 .unwrap();
             self.add_connection(WireGuardConnection::new(id.to_string(), true));
-            Ok(())
+            Ok(id.to_string())
         }
     }
 
@@ -139,7 +144,7 @@ mod import_connection_usecase_tests {
         // Assert
         assert!(result.is_ok());
         assert!(new_connection.is_some());
-        assert!(new_connection.unwrap().get_is_active());
+        assert!(!new_connection.unwrap().get_is_active());
     }
 
     /// Test that ensures an import attempt fails with the expected error if the provided config

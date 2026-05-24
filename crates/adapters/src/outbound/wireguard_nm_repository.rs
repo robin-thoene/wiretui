@@ -202,7 +202,7 @@ impl WireGuardPort for WireGuardNmRepository {
         }
     }
 
-    fn import_from_file(&self, config_file_path: PathBuf) -> Result<(), ConnectionImportError> {
+    fn import_from_file(&self, config_file_path: PathBuf) -> Result<String, ConnectionImportError> {
         log::info!(
             "importing connection from path {}",
             config_file_path.to_str().expect("expect for debugging")
@@ -258,7 +258,7 @@ impl WireGuardPort for WireGuardNmRepository {
                             )
                         }
                     }
-                    Ok(())
+                    Ok(conn_name.to_string())
                 } else {
                     log::error!("failed to import the connection: {}", res);
                     Err(ConnectionImportError::Infrastructure(InfrastructureError))

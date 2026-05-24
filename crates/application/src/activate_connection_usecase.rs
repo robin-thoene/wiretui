@@ -204,8 +204,8 @@ mod activate_connection_usecase_tests {
         fn import_from_file(
             &self,
             _file_path: PathBuf,
-        ) -> Result<(), ports::outbound::wireguard_port::ConnectionImportError> {
-            Ok(())
+        ) -> Result<String, ports::outbound::wireguard_port::ConnectionImportError> {
+            Ok("".into())
         }
     }
 

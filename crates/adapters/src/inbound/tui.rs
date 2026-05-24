@@ -214,6 +214,7 @@ where
         // TODO: use a more optimal way to mark successful activated conn as active
         let connections_result = self.list_connections_port.get();
         if let Ok(conn) = connections_result {
+            log::debug!("refreshing connection list with the new value: {:?}", conn);
             self.connections.value = conn;
         } else {
             // TODO: display error in UI

@@ -58,7 +58,7 @@ pub trait WireGuardPort {
     ///
     /// A new connection can not be created from the provided config file, a custom error is
     /// returned.
-    fn import_from_file(&self, config_file_path: PathBuf) -> Result<(), ConnectionImportError>;
+    fn import_from_file(&self, config_file_path: PathBuf) -> Result<String, ConnectionImportError>;
 }
 
 #[derive(Debug)]
