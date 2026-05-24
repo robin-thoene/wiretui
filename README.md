@@ -19,7 +19,6 @@ You will need to use a **Linux** based operating system using the **NetworkManag
 - [x] activate a connection
 - [x] deactivate a connection
 - [x] import a new connection from a config file
-      ([#7](https://github.com/robin-thoene/wiretui/issues/7))
 - [ ] remove an existing connection ([#6](https://github.com/robin-thoene/wiretui/issues/6))
 - [ ] search connection list ([#13](https://github.com/robin-thoene/wiretui/issues/13))
 
