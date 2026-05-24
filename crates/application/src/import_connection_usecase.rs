@@ -1,6 +1,8 @@
 use ports::{
     inbound::import_connection_port::{ConnectionImportError, ImportConnectionPort},
-    outbound::wireguard_port::WireGuardPort,
+    outbound::wireguard_port::{
+        ConnectionImportError as AdapterConnectionImportError, WireGuardPort,
+    },
 };
 use std::path::PathBuf;
 
@@ -30,9 +32,15 @@ where
         if !config_file_path.exists() {
             return Err(ConnectionImportError::FileNotFound);
         }
+        // TODO: validate the content of the conf file to verify it is a wireguard config
         self.wireguard_port
             .import_from_file(config_file_path)
-            .map_err(|_err| ConnectionImportError::Infra)?;
+            .map_err(|err| match err {
+                AdapterConnectionImportError::Infrastructure(_infrastructure_error) => {
+                    ConnectionImportError::Infra
+                }
+                AdapterConnectionImportError::FileNotFound => ConnectionImportError::FileNotFound,
+            })?;
         Ok(())
     }
 }
@@ -61,6 +69,10 @@ mod import_connection_usecase_tests {
                 .map(|x| WireGuardConnection::new(x.get_id().into(), *x.get_is_active()))
                 .collect();
             conn
+        }
+
+        pub fn add_connection(&self, conn: WireGuardConnection) {
+            self.available_connections.borrow_mut().push(conn);
         }
 
         /// Internally mark the connection as activated/deactivated if it exists in the mock state
@@ -92,8 +104,18 @@ mod import_connection_usecase_tests {
 
         fn import_from_file(
             &self,
-            _file_path: PathBuf,
+            file_path: PathBuf,
         ) -> Result<(), ports::outbound::wireguard_port::ConnectionImportError> {
+            let id = file_path
+                .iter()
+                .next_back()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .split('.')
+                .next()
+                .unwrap();
+            self.add_connection(WireGuardConnection::new(id.to_string(), true));
             Ok(())
         }
     }
@@ -102,16 +124,22 @@ mod import_connection_usecase_tests {
     #[test]
     fn success_import_connection_from_conf_file() {
         // Arrange
+        let connection_id = "mock_valid_wg";
         let test_file_path = format!(
-            "{}/tests/data/mock_valid_wg.conf",
-            env!("CARGO_MANIFEST_DIR")
+            "{}/tests/data/{}.conf",
+            env!("CARGO_MANIFEST_DIR"),
+            connection_id
         );
         let repo_mock = WireGuardNmRepoMock::default();
         let use_case = ImportConnectionUsecase::new(&repo_mock);
         // Act
         let result = use_case.import_from_file(&test_file_path);
+        let all_connections = repo_mock.get_imported_connections().unwrap();
+        let new_connection = all_connections.iter().find(|x| x.get_id() == connection_id);
         // Assert
-        assert!(result.is_ok())
+        assert!(result.is_ok());
+        assert!(new_connection.is_some());
+        assert!(new_connection.unwrap().get_is_active());
     }
 
     /// Test that ensures an import attempt fails with the expected error if the provided config
