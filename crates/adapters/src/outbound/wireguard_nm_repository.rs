@@ -229,6 +229,35 @@ impl WireGuardPort for WireGuardNmRepository {
             Ok(res) => {
                 if res.success() {
                     log::info!("imported the new connection");
+                    let conn_name = config_file_path
+                        .iter()
+                        .next_back()
+                        .expect("expect connection name to be resolved by file name")
+                        .to_str()
+                        .expect("expect connection name to be a str")
+                        .split('.')
+                        .next()
+                        .expect("expect the first element to be the file name without extension");
+                    let modification_status = Command::new("nmcli")
+                        .arg("connection")
+                        .arg("modify")
+                        .arg(conn_name)
+                        .arg("connection.autoconnect")
+                        .arg("no")
+                        .stderr(Stdio::null())
+                        .stdout(Stdio::null())
+                        .status();
+                    match modification_status {
+                        Ok(_) => {
+                            log::info!("deactivated auto connect for connection {}", conn_name)
+                        }
+                        Err(_) => {
+                            log::error!(
+                                "failed to deactivate the auto connect option for connection {}",
+                                conn_name
+                            )
+                        }
+                    }
                     Ok(())
                 } else {
                     log::error!("failed to import the connection: {}", res);
