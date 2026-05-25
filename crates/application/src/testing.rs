@@ -11,6 +11,8 @@ use std::{cell::RefCell, path::PathBuf};
 pub struct WireGuardNmRepoMock {
     /// Internal state of mocked imported WireGuard connections to use for testing
     available_connections: RefCell<Vec<WireGuardConnection>>,
+    /// The error type the mock shall return when the `get_imported_connections` fn is invoked
+    get_imported_connections_error: Option<AdapterGetConnectionsError>,
 }
 
 /// Mock implementation of the WireGuardNmRepo
@@ -19,6 +21,19 @@ impl WireGuardNmRepoMock {
     pub fn new(initial_connections: Vec<WireGuardConnection>) -> Self {
         Self {
             available_connections: RefCell::new(initial_connections),
+            get_imported_connections_error: None,
+        }
+    }
+
+    /// Create a new mock instance with a given initial state of available connections and
+    /// expected errors that shall be returned as part of the mock
+    pub fn new_with_error(
+        initial_connections: Vec<WireGuardConnection>,
+        get_imported_connections_error: AdapterGetConnectionsError,
+    ) -> Self {
+        Self {
+            available_connections: RefCell::new(initial_connections),
+            get_imported_connections_error: Some(get_imported_connections_error),
         }
     }
 
@@ -110,6 +125,9 @@ impl WireGuardPort for WireGuardNmRepoMock {
     fn get_imported_connections(
         &self,
     ) -> Result<Vec<WireGuardConnection>, AdapterGetConnectionsError> {
+        if let Some(expected_error) = self.get_imported_connections_error {
+            return Err(expected_error);
+        }
         let conns: Vec<WireGuardConnection> = self.get_all_connections();
         Ok(conns)
     }

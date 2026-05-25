@@ -77,7 +77,7 @@ impl fmt::Display for ConnectionImportError {
 
 /// Error that occurs when trying to connect with the infrastructure used to manage the network
 /// connections
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct InfrastructureError;
 impl Error for InfrastructureError {}
 impl fmt::Display for InfrastructureError {
@@ -100,7 +100,7 @@ impl fmt::Display for ConnectionNotFoundError {
 }
 
 /// Error types that could occur when trying to receive all imported connections
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum GetConnectionsError {
     /// Error while connecting to the infrastructure that is used to manage connections
     Infrastructure(InfrastructureError),

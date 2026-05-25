@@ -39,10 +39,7 @@ where
 mod list_connections_usecase_tests {
     use super::*;
     use crate::testing::*;
-    use ports::outbound::wireguard_port::{
-        ConnectionActivationError, ConnectionDeactivationError, GetConnectionsError,
-        InfrastructureError,
-    };
+    use ports::outbound::wireguard_port::{GetConnectionsError, InfrastructureError};
 
     /// Ensures that the use case returns an empty vec if the WireGuardPort returns an empty one
     /// as well
@@ -63,35 +60,13 @@ mod list_connections_usecase_tests {
     /// Ensures that an error on the WireGuardPort results in the correct custom error return type
     #[test]
     fn return_infra_error_correctly() {
-        // TODO: find a way to centrally mock such things
         // Arrange
-        #[derive(Default)]
-        struct CustomWireGuardDbusRepoMock {}
-        impl WireGuardPort for CustomWireGuardDbusRepoMock {
-            fn get_imported_connections(
-                &self,
-            ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
-                Err(GetConnectionsError::Infrastructure(InfrastructureError))
-            }
-
-            fn activate_connection(&self, _id: &str) -> Result<(), ConnectionActivationError> {
-                Ok(())
-            }
-
-            fn deactivate_connection(&self, _id: &str) -> Result<(), ConnectionDeactivationError> {
-                Ok(())
-            }
-
-            fn import_from_file(
-                &self,
-                _config_file_path: std::path::PathBuf,
-            ) -> Result<String, ports::outbound::wireguard_port::ConnectionImportError>
-            {
-                Ok("".into())
-            }
-        }
+        let repo_mock = WireGuardNmRepoMock::new_with_error(
+            vec![],
+            GetConnectionsError::Infrastructure(InfrastructureError),
+        );
         // Act
-        let result = ListConnectionsUseCase::new(&CustomWireGuardDbusRepoMock::default()).get();
+        let result = ListConnectionsUseCase::new(&repo_mock).get();
         // Assert
         assert!(result.is_err_and(|x| x == ListConnectionError::Infra));
     }
