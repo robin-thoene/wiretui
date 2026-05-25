@@ -41,6 +41,9 @@ where
                     ConnectionImportError::Infra
                 }
                 AdapterConnectionImportError::FileNotFound => ConnectionImportError::FileNotFound,
+                AdapterConnectionImportError::CouldNotResolveConnectionId => {
+                    ConnectionImportError::InvalidConfig
+                }
             })?;
         let deactivation_result = self.wireguard_port.deactivate_connection(&id);
         match deactivation_result {

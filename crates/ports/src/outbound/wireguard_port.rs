@@ -67,6 +67,8 @@ pub enum ConnectionImportError {
     Infrastructure(InfrastructureError),
     /// The file to import the connection from can not be found
     FileNotFound,
+    /// The unique identifier for the new connection could not be determined
+    CouldNotResolveConnectionId,
 }
 impl Error for ConnectionImportError {}
 impl fmt::Display for ConnectionImportError {
