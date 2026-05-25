@@ -141,7 +141,6 @@ where
             match key_event.code {
                 KeyCode::Esc => self.close_import_popup(),
                 KeyCode::Enter => self.import_new_connection(),
-
                 _ => {
                     // Let the popup handle the key event
                     self.import_popup.handle_key_event(key_event);
