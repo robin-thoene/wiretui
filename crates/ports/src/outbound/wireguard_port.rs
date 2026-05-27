@@ -75,7 +75,23 @@ pub enum ConnectionImportError {
 impl Error for ConnectionImportError {}
 impl fmt::Display for ConnectionImportError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "error while importing the connection")
+        match self {
+            ConnectionImportError::Infrastructure(inner) => {
+                write!(f, "could not import the new connection: {}", inner)
+            }
+            ConnectionImportError::FileNotFound => {
+                write!(f, "no file found for the provided path")
+            }
+            ConnectionImportError::CouldNotResolveConnectionId => {
+                write!(
+                    f,
+                    "could not determine the identifier for the new connection"
+                )
+            }
+            ConnectionImportError::CouldNotModify => {
+                write!(f, "the imported connection could not be modified")
+            }
+        }
     }
 }
 
