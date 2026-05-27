@@ -63,7 +63,9 @@ mod list_connections_usecase_tests {
         // Arrange
         let repo_mock = WireGuardNmRepoMock::new_with_error(
             vec![],
-            GetConnectionsError::Infrastructure(InfrastructureError),
+            Some(GetConnectionsError::Infrastructure(InfrastructureError)),
+            None,
+            None,
         );
         // Act
         let result = ListConnectionsUseCase::new(&repo_mock).get();

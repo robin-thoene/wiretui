@@ -9,7 +9,7 @@ use ports::outbound::wireguard_port::{
     ConnectionNotFoundError, GetConnectionsError, InfrastructureError, WireGuardPort,
 };
 use std::{
-    path::PathBuf,
+    path::Path,
     process::{Command, Stdio},
 };
 use zbus::{blocking::Connection, zvariant::OwnedObjectPath};
@@ -202,7 +202,7 @@ impl WireGuardPort for WireGuardNmRepository {
         }
     }
 
-    fn import_from_file(&self, config_file_path: PathBuf) -> Result<String, ConnectionImportError> {
+    fn import_from_file(&self, config_file_path: &Path) -> Result<String, ConnectionImportError> {
         log::info!("importing connection from path {:?}", config_file_path);
         if !config_file_path.exists() {
             log::error!("config file {:?} does not exist", config_file_path);
@@ -245,11 +245,13 @@ impl WireGuardPort for WireGuardNmRepository {
                                     conn_name
                                 )
                             }
-                            Err(_) => {
+                            Err(err) => {
                                 log::error!(
-                                    "failed to deactivate the auto connect option for connection {:?}",
-                                    conn_name
-                                )
+                                    "failed to deactivate the auto connect option for connection {:?} with error {}",
+                                    conn_name,
+                                    err
+                                );
+                                return Err(ConnectionImportError::CouldNotModify);
                             }
                         }
                         Ok(conn_name.to_string())

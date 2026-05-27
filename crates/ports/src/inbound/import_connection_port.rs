@@ -22,6 +22,7 @@ pub enum ConnectionImportError {
     Infra,
     FileNotFound,
     InvalidConfig,
+    CouldNotModify,
 }
 impl Error for ConnectionImportError {}
 impl fmt::Display for ConnectionImportError {
@@ -30,6 +31,9 @@ impl fmt::Display for ConnectionImportError {
             ConnectionImportError::Infra => write!(f, "an error occurred"),
             ConnectionImportError::FileNotFound => write!(f, "the config file does not exist"),
             ConnectionImportError::InvalidConfig => write!(f, "the config file is not valid"),
+            ConnectionImportError::CouldNotModify => {
+                write!(f, "the imported config could not be modified")
+            }
         }
     }
 }

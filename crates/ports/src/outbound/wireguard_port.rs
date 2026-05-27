@@ -2,7 +2,7 @@ use domain::models::WireGuardConnection;
 use std::{
     error::Error,
     fmt::{self},
-    path::PathBuf,
+    path::Path,
 };
 
 /// Must be implemented by adapters handling WireGuard
@@ -58,10 +58,10 @@ pub trait WireGuardPort {
     ///
     /// A new connection can not be created from the provided config file, a custom error is
     /// returned.
-    fn import_from_file(&self, config_file_path: PathBuf) -> Result<String, ConnectionImportError>;
+    fn import_from_file(&self, config_file_path: &Path) -> Result<String, ConnectionImportError>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum ConnectionImportError {
     /// Error while connecting to the infrastructure that is used to import connections
     Infrastructure(InfrastructureError),
@@ -69,6 +69,8 @@ pub enum ConnectionImportError {
     FileNotFound,
     /// The unique identifier for the new connection could not be determined
     CouldNotResolveConnectionId,
+    /// Error while trying to modify the imported connection
+    CouldNotModify,
 }
 impl Error for ConnectionImportError {}
 impl fmt::Display for ConnectionImportError {
@@ -92,7 +94,7 @@ impl fmt::Display for InfrastructureError {
 }
 
 /// Error that occurs when trying to access a connection that can not be found
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct ConnectionNotFoundError;
 impl Error for ConnectionNotFoundError {}
 impl fmt::Display for ConnectionNotFoundError {
@@ -156,7 +158,7 @@ impl fmt::Display for ConnectionActivationError {
 }
 
 /// Error types that could occur when trying to deactivate a connection
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum ConnectionDeactivationError {
     /// Error while connecting to the infrastructure that is used to manage connections
     Infrastructure(InfrastructureError),

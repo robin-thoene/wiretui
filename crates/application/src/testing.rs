@@ -2,17 +2,22 @@ use domain::models::WireGuardConnection;
 use ports::outbound::wireguard_port::{
     ConnectionActivationError as AdapterConnectionActivationError,
     ConnectionDeactivationError as AdapterConnectionDeactivationError,
+    ConnectionImportError as AdapterConnectionConnectionImportError,
     GetConnectionsError as AdapterGetConnectionsError, WireGuardPort,
 };
-use std::{cell::RefCell, path::PathBuf};
+use std::{cell::RefCell, path::Path};
 
 /// Mock for the WireGuardNmRepo
 #[derive(Default)]
 pub struct WireGuardNmRepoMock {
     /// Internal state of mocked imported WireGuard connections to use for testing
     available_connections: RefCell<Vec<WireGuardConnection>>,
-    /// The error type the mock shall return when the `get_imported_connections` fn is invoked
+    /// The error type the mock shall return when the fn to list all connections is invoked
     get_imported_connections_error: Option<AdapterGetConnectionsError>,
+    /// The error type the mock shall return when the fn to deactivate a connection is invoked
+    deactivate_connection_error: Option<AdapterConnectionDeactivationError>,
+    /// The error type the mock shall return when the fn to import a connection is invoked
+    import_connection_error: Option<AdapterConnectionConnectionImportError>,
 }
 
 /// Mock implementation of the WireGuardNmRepo
@@ -22,6 +27,8 @@ impl WireGuardNmRepoMock {
         Self {
             available_connections: RefCell::new(initial_connections),
             get_imported_connections_error: None,
+            deactivate_connection_error: None,
+            import_connection_error: None,
         }
     }
 
@@ -29,11 +36,15 @@ impl WireGuardNmRepoMock {
     /// expected errors that shall be returned as part of the mock
     pub fn new_with_error(
         initial_connections: Vec<WireGuardConnection>,
-        get_imported_connections_error: AdapterGetConnectionsError,
+        get_imported_connections_error: Option<AdapterGetConnectionsError>,
+        deactivate_connection_error: Option<AdapterConnectionDeactivationError>,
+        import_connection_error: Option<AdapterConnectionConnectionImportError>,
     ) -> Self {
         Self {
             available_connections: RefCell::new(initial_connections),
-            get_imported_connections_error: Some(get_imported_connections_error),
+            get_imported_connections_error,
+            deactivate_connection_error,
+            import_connection_error,
         }
     }
 
@@ -138,14 +149,20 @@ impl WireGuardPort for WireGuardNmRepoMock {
     }
 
     fn deactivate_connection(&self, id: &str) -> Result<(), AdapterConnectionDeactivationError> {
+        if let Some(expected_error) = self.deactivate_connection_error {
+            return Err(expected_error);
+        }
         self.set_internal_conn_state(id, false);
         Ok(())
     }
 
     fn import_from_file(
         &self,
-        config_file_path: PathBuf,
+        config_file_path: &Path,
     ) -> Result<String, ports::outbound::wireguard_port::ConnectionImportError> {
+        if let Some(expected_error) = self.import_connection_error {
+            return Err(expected_error);
+        }
         let id = config_file_path
             .iter()
             .next_back()
