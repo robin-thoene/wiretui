@@ -38,35 +38,18 @@ where
 #[cfg(test)]
 mod list_connections_usecase_tests {
     use super::*;
-    use ports::outbound::wireguard_port::{
-        ConnectionActivationError, ConnectionDeactivationError, GetConnectionsError,
-        InfrastructureError,
-    };
+    use crate::testing::*;
+    use ports::outbound::wireguard_port::{GetConnectionsError, InfrastructureError};
 
     /// Ensures that the use case returns an empty vec if the WireGuardPort returns an empty one
     /// as well
     #[test]
     fn returns_expected_empty_vec() {
         // Arrange
-        #[derive(Default)]
-        struct WireGuardDbusRepoMock {}
-        impl WireGuardPort for WireGuardDbusRepoMock {
-            fn get_imported_connections(
-                &self,
-            ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
-                Ok(vec![])
-            }
-
-            fn activate_connection(&self, _id: &str) -> Result<(), ConnectionActivationError> {
-                Ok(())
-            }
-
-            fn deactivate_connection(&self, _id: &str) -> Result<(), ConnectionDeactivationError> {
-                Ok(())
-            }
-        }
+        let repo_mock = WireGuardNmRepoMock::default();
+        assert_eq!(repo_mock.get_all_connections().iter().len(), 0);
         // Act
-        let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
+        let result = ListConnectionsUseCase::new(&repo_mock).get();
         // Assert
         assert!(result.is_ok());
         let data = result.expect("expecting no error");
@@ -78,25 +61,14 @@ mod list_connections_usecase_tests {
     #[test]
     fn return_infra_error_correctly() {
         // Arrange
-        #[derive(Default)]
-        struct WireGuardDbusRepoMock {}
-        impl WireGuardPort for WireGuardDbusRepoMock {
-            fn get_imported_connections(
-                &self,
-            ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
-                Err(GetConnectionsError::Infrastructure(InfrastructureError))
-            }
-
-            fn activate_connection(&self, _id: &str) -> Result<(), ConnectionActivationError> {
-                Ok(())
-            }
-
-            fn deactivate_connection(&self, _id: &str) -> Result<(), ConnectionDeactivationError> {
-                Ok(())
-            }
-        }
+        let repo_mock = WireGuardNmRepoMock::new_with_error(
+            vec![],
+            Some(GetConnectionsError::Infrastructure(InfrastructureError)),
+            None,
+            None,
+        );
         // Act
-        let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
+        let result = ListConnectionsUseCase::new(&repo_mock).get();
         // Assert
         assert!(result.is_err_and(|x| x == ListConnectionError::Infra));
     }
@@ -105,40 +77,15 @@ mod list_connections_usecase_tests {
     #[test]
     fn returns_expected_items() {
         // Arrange
-        #[derive(Default)]
-        struct WireGuardDbusRepoMock {}
-        impl WireGuardPort for WireGuardDbusRepoMock {
-            fn get_imported_connections(
-                &self,
-            ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
-                Ok(vec![
-                    WireGuardConnection::new("some-id-0".to_string(), false),
-                    WireGuardConnection::new("some-id-1".to_string(), false),
-                    WireGuardConnection::new("some-id-2".to_string(), false),
-                    WireGuardConnection::new("some-id-3".to_string(), false),
-                    WireGuardConnection::new("some-id-4".to_string(), false),
-                    WireGuardConnection::new("some-id-5".to_string(), false),
-                ])
-            }
-
-            fn activate_connection(&self, _id: &str) -> Result<(), ConnectionActivationError> {
-                Ok(())
-            }
-
-            fn deactivate_connection(&self, _id: &str) -> Result<(), ConnectionDeactivationError> {
-                Ok(())
-            }
-        }
+        let repo_mock = WireGuardNmRepoMock::init_with_no_active_connection();
         let expected_data = vec![
-            WireGuardConnection::new("some-id-0".to_string(), false),
             WireGuardConnection::new("some-id-1".to_string(), false),
             WireGuardConnection::new("some-id-2".to_string(), false),
             WireGuardConnection::new("some-id-3".to_string(), false),
             WireGuardConnection::new("some-id-4".to_string(), false),
-            WireGuardConnection::new("some-id-5".to_string(), false),
         ];
         // Act
-        let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
+        let result = ListConnectionsUseCase::new(&repo_mock).get();
         // Assert
         assert!(result.is_ok());
         let data = result.expect("expecting no error");
@@ -151,40 +98,16 @@ mod list_connections_usecase_tests {
     #[test]
     fn returns_items_sorted() {
         // Arrange
-        #[derive(Default)]
-        struct WireGuardDbusRepoMock {}
-        impl WireGuardPort for WireGuardDbusRepoMock {
-            fn get_imported_connections(
-                &self,
-            ) -> Result<Vec<WireGuardConnection>, GetConnectionsError> {
-                Ok(vec![
-                    WireGuardConnection::new("some-id-0".to_string(), false),
-                    WireGuardConnection::new("some-id-3".to_string(), false),
-                    WireGuardConnection::new("some-id-1".to_string(), false),
-                    WireGuardConnection::new("some-id-5".to_string(), false),
-                    WireGuardConnection::new("some-id-4".to_string(), false),
-                    WireGuardConnection::new("some-id-2".to_string(), false),
-                ])
-            }
-
-            fn activate_connection(&self, _id: &str) -> Result<(), ConnectionActivationError> {
-                Ok(())
-            }
-
-            fn deactivate_connection(&self, _id: &str) -> Result<(), ConnectionDeactivationError> {
-                Ok(())
-            }
-        }
+        let repo_mock = WireGuardNmRepoMock::init_with_no_active_connection_unordered();
+        assert!(repo_mock.get_all_connections().iter().len() > 1);
         let expected_data = vec![
-            WireGuardConnection::new("some-id-0".to_string(), false),
             WireGuardConnection::new("some-id-1".to_string(), false),
             WireGuardConnection::new("some-id-2".to_string(), false),
             WireGuardConnection::new("some-id-3".to_string(), false),
             WireGuardConnection::new("some-id-4".to_string(), false),
-            WireGuardConnection::new("some-id-5".to_string(), false),
         ];
         // Act
-        let result = ListConnectionsUseCase::new(&WireGuardDbusRepoMock::default()).get();
+        let result = ListConnectionsUseCase::new(&repo_mock).get();
         // Assert
         assert!(result.is_ok());
         let data = result.expect("expecting no error");

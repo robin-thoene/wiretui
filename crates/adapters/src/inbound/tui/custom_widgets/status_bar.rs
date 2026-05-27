@@ -4,6 +4,7 @@ use ratatui::{
     widgets::{Block, Widget},
 };
 
+#[derive(Default)]
 pub struct StatusBar {}
 
 impl Widget for StatusBar {

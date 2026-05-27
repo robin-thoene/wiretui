@@ -2,6 +2,7 @@ use domain::models::WireGuardConnection;
 use std::{
     error::Error,
     fmt::{self},
+    path::Path,
 };
 
 /// Must be implemented by adapters handling WireGuard
@@ -46,11 +47,57 @@ pub trait WireGuardPort {
     /// - infrastructure failure while attempting to deactivate the connection
     /// - logical error (for example connection with id does not exist)
     fn deactivate_connection(&self, id: &str) -> Result<(), ConnectionDeactivationError>;
+
+    /// Imports a single connection from a config file
+    ///
+    /// # Arguments
+    ///
+    /// * `config_file_path` - The path to the config file
+    ///
+    /// # Errors
+    ///
+    /// A new connection can not be created from the provided config file, a custom error is
+    /// returned.
+    fn import_from_file(&self, config_file_path: &Path) -> Result<String, ConnectionImportError>;
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum ConnectionImportError {
+    /// Error while connecting to the infrastructure that is used to import connections
+    Infrastructure(InfrastructureError),
+    /// The file to import the connection from can not be found
+    FileNotFound,
+    /// The unique identifier for the new connection could not be determined
+    CouldNotResolveConnectionId,
+    /// Error while trying to modify the imported connection
+    CouldNotModify,
+}
+impl Error for ConnectionImportError {}
+impl fmt::Display for ConnectionImportError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ConnectionImportError::Infrastructure(inner) => {
+                write!(f, "could not import the new connection: {}", inner)
+            }
+            ConnectionImportError::FileNotFound => {
+                write!(f, "no file found for the provided path")
+            }
+            ConnectionImportError::CouldNotResolveConnectionId => {
+                write!(
+                    f,
+                    "could not determine the identifier for the new connection"
+                )
+            }
+            ConnectionImportError::CouldNotModify => {
+                write!(f, "the imported connection could not be modified")
+            }
+        }
+    }
 }
 
 /// Error that occurs when trying to connect with the infrastructure used to manage the network
 /// connections
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct InfrastructureError;
 impl Error for InfrastructureError {}
 impl fmt::Display for InfrastructureError {
@@ -63,7 +110,7 @@ impl fmt::Display for InfrastructureError {
 }
 
 /// Error that occurs when trying to access a connection that can not be found
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct ConnectionNotFoundError;
 impl Error for ConnectionNotFoundError {}
 impl fmt::Display for ConnectionNotFoundError {
@@ -73,7 +120,7 @@ impl fmt::Display for ConnectionNotFoundError {
 }
 
 /// Error types that could occur when trying to receive all imported connections
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum GetConnectionsError {
     /// Error while connecting to the infrastructure that is used to manage connections
     Infrastructure(InfrastructureError),
@@ -127,7 +174,7 @@ impl fmt::Display for ConnectionActivationError {
 }
 
 /// Error types that could occur when trying to deactivate a connection
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum ConnectionDeactivationError {
     /// Error while connecting to the infrastructure that is used to manage connections
     Infrastructure(InfrastructureError),

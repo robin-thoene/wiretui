@@ -5,8 +5,12 @@ use crate::outbound::dbus_repository::{
 };
 use domain::models::WireGuardConnection;
 use ports::outbound::wireguard_port::{
-    ConnectionActivationError, ConnectionDeactivationError, ConnectionNotFoundError,
-    GetConnectionsError, InfrastructureError, WireGuardPort,
+    ConnectionActivationError, ConnectionDeactivationError, ConnectionImportError,
+    ConnectionNotFoundError, GetConnectionsError, InfrastructureError, WireGuardPort,
+};
+use std::{
+    path::Path,
+    process::{Command, Stdio},
 };
 use zbus::{blocking::Connection, zvariant::OwnedObjectPath};
 
@@ -195,6 +199,78 @@ impl WireGuardPort for WireGuardNmRepository {
             Err(ConnectionDeactivationError::NotFound(
                 ConnectionNotFoundError,
             ))
+        }
+    }
+
+    fn import_from_file(&self, config_file_path: &Path) -> Result<String, ConnectionImportError> {
+        log::info!("importing connection from path {:?}", config_file_path);
+        if !config_file_path.exists() {
+            log::error!("config file {:?} does not exist", config_file_path);
+            return Err(ConnectionImportError::FileNotFound);
+        }
+        let conn_name = config_file_path.file_stem();
+        if let Some(conn_name) = conn_name.and_then(|x| x.to_str()) {
+            // TODO: replace this by a proper call to the dbus
+            let import_status = Command::new("nmcli")
+                .arg("connection")
+                .arg("import")
+                .arg("type")
+                .arg("wireguard")
+                .arg("file")
+                .arg(
+                    config_file_path
+                        .to_str()
+                        .expect("expect the file path to be converted to str"),
+                )
+                .stderr(Stdio::null())
+                .stdout(Stdio::null())
+                .status();
+            match import_status {
+                Ok(res) => {
+                    if res.success() {
+                        log::info!("imported the new connection");
+                        let modification_status = Command::new("nmcli")
+                            .arg("connection")
+                            .arg("modify")
+                            .arg(conn_name)
+                            .arg("connection.autoconnect")
+                            .arg("no")
+                            .stderr(Stdio::null())
+                            .stdout(Stdio::null())
+                            .status();
+                        match modification_status {
+                            Ok(_) => {
+                                log::info!(
+                                    "deactivated auto connect for connection {:?}",
+                                    conn_name
+                                )
+                            }
+                            Err(err) => {
+                                log::error!(
+                                    "failed to deactivate the auto connect option for connection {:?} with error {}",
+                                    conn_name,
+                                    err
+                                );
+                                return Err(ConnectionImportError::CouldNotModify);
+                            }
+                        }
+                        Ok(conn_name.to_string())
+                    } else {
+                        log::error!("failed to import the connection: {}", res);
+                        Err(ConnectionImportError::Infrastructure(InfrastructureError))
+                    }
+                }
+                Err(err) => {
+                    log::error!("failed to import the connection: {}", err);
+                    Err(ConnectionImportError::Infrastructure(InfrastructureError))
+                }
+            }
+        } else {
+            log::error!(
+                "could not determine connection name from file {:?}",
+                config_file_path
+            );
+            Err(ConnectionImportError::CouldNotResolveConnectionId)
         }
     }
 }
