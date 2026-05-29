@@ -7,7 +7,7 @@ use crate::inbound::tui::custom_widgets::{
     status_bar::StatusBar,
     user_input_popup::UserInputPopup,
 };
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
+use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use domain::models::WireGuardConnection;
 use ports::inbound::{
     activate_connection_port::ActivateConnectionPort,
@@ -173,6 +173,9 @@ where
                 .select_previous(),
             KeyCode::Char(' ') => self.toggle_selected_connection(),
             KeyCode::Char('i') if !self.show_import_popup => self.open_import_popup(),
+            KeyCode::Char('d') if key_event.modifiers.contains(KeyModifiers::CONTROL) => {
+                // TODO: remove the imported connection
+            }
             _ => {}
         }
     }
