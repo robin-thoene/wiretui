@@ -7,7 +7,7 @@ use std::{
 
 /// Must be implemented by adapters handling WireGuard
 pub trait WireGuardPort {
-    /// Retrieves all already imported and available WireGuard connections
+    /// Retrieve all already imported and available WireGuard connections
     ///
     /// # Errors
     ///
@@ -48,7 +48,7 @@ pub trait WireGuardPort {
     /// - logical error (for example connection with id does not exist)
     fn deactivate_connection(&self, id: &str) -> Result<(), ConnectionDeactivationError>;
 
-    /// Imports a single connection from a config file
+    /// Import a single connection from a config file
     ///
     /// # Arguments
     ///
@@ -59,6 +59,43 @@ pub trait WireGuardPort {
     /// A new connection can not be created from the provided config file, a custom error is
     /// returned.
     fn import_from_file(&self, config_file_path: &Path) -> Result<String, ConnectionImportError>;
+
+    /// Remove a single imported connection
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The connection identifier
+    ///
+    /// # Errors
+    ///
+    /// The connection can not be removed, a custom error is returned.
+    fn remove_connection(&self, id: &str) -> Result<(), ConnectionRemovalError>;
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum ConnectionRemovalError {
+    /// Error while connecting to the infrastructure that is used to remove connections
+    Infrastructure(InfrastructureError),
+    /// Error while retrieving the imported connections
+    ImportedConnectionsRetrieval,
+    /// The connection to remove does not exist
+    ConnectionNotFound(ConnectionNotFoundError),
+}
+impl Error for ConnectionRemovalError {}
+impl fmt::Display for ConnectionRemovalError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ConnectionRemovalError::Infrastructure(inner) => {
+                write!(f, "could not remove the connection: {}", inner)
+            }
+            ConnectionRemovalError::ImportedConnectionsRetrieval => {
+                write!(f, "currently imported connections could not be retrieved")
+            }
+            ConnectionRemovalError::ConnectionNotFound(inner) => {
+                write!(f, "the connection to remove could not be found: {}", inner)
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]

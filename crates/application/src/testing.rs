@@ -3,6 +3,8 @@ use ports::outbound::wireguard_port::{
     ConnectionActivationError as AdapterConnectionActivationError,
     ConnectionDeactivationError as AdapterConnectionDeactivationError,
     ConnectionImportError as AdapterConnectionConnectionImportError,
+    ConnectionImportError as AdapterConnectionImportError,
+    ConnectionRemovalError as AdapterConnectionRemovalError,
     GetConnectionsError as AdapterGetConnectionsError, WireGuardPort,
 };
 use std::{cell::RefCell, path::Path};
@@ -65,7 +67,7 @@ impl WireGuardNmRepoMock {
             .available_connections
             .borrow()
             .iter()
-            .filter(|x| x.get_is_active() == &true)
+            .filter(|x| *x.get_is_active())
             .map(|x| WireGuardConnection::new(x.get_id().into(), *x.get_is_active()))
             .collect();
         conn
@@ -159,7 +161,7 @@ impl WireGuardPort for WireGuardNmRepoMock {
     fn import_from_file(
         &self,
         config_file_path: &Path,
-    ) -> Result<String, ports::outbound::wireguard_port::ConnectionImportError> {
+    ) -> Result<String, AdapterConnectionImportError> {
         if let Some(expected_error) = self.import_connection_error {
             return Err(expected_error);
         }
@@ -174,5 +176,10 @@ impl WireGuardPort for WireGuardNmRepoMock {
             .unwrap();
         self.add_connection(WireGuardConnection::new(id.to_string(), true));
         Ok(id.to_string())
+    }
+
+    fn remove_connection(&self, _id: &str) -> Result<(), AdapterConnectionRemovalError> {
+        // TODO: implement
+        Ok(())
     }
 }
