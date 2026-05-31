@@ -47,7 +47,7 @@ where
                     );
                     ConnectionImportError::Infra
                 }
-                AdapterConnectionImportError::FileNotFound => {
+                AdapterConnectionImportError::FileNotFound(_inner) => {
                     log::error!("{}", not_found_msg);
                     ConnectionImportError::FileNotFound
                 }

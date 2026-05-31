@@ -79,7 +79,7 @@ pub enum ConnectionRemovalError {
     /// Error while retrieving the imported connections
     ImportedConnectionsRetrieval,
     /// The connection to remove does not exist
-    ConnectionNotFound(ConnectionNotFoundError),
+    ConnectionNotFound(NotFoundError),
 }
 impl Error for ConnectionRemovalError {}
 impl fmt::Display for ConnectionRemovalError {
@@ -103,7 +103,7 @@ pub enum ConnectionImportError {
     /// Error while connecting to the infrastructure that is used to import connections
     Infrastructure(InfrastructureError),
     /// The file to import the connection from can not be found
-    FileNotFound,
+    FileNotFound(NotFoundError),
     /// The unique identifier for the new connection could not be determined
     CouldNotResolveConnectionId,
     /// Error while trying to modify the imported connection
@@ -116,8 +116,12 @@ impl fmt::Display for ConnectionImportError {
             ConnectionImportError::Infrastructure(inner) => {
                 write!(f, "could not import the new connection: {}", inner)
             }
-            ConnectionImportError::FileNotFound => {
-                write!(f, "no file found for the provided path")
+            ConnectionImportError::FileNotFound(inner) => {
+                write!(
+                    f,
+                    "could not import new connection from config file: {}",
+                    inner
+                )
             }
             ConnectionImportError::CouldNotResolveConnectionId => {
                 write!(
@@ -148,11 +152,11 @@ impl fmt::Display for InfrastructureError {
 
 /// Error that occurs when trying to access a connection that can not be found
 #[derive(Debug, Clone, Copy)]
-pub struct ConnectionNotFoundError;
-impl Error for ConnectionNotFoundError {}
-impl fmt::Display for ConnectionNotFoundError {
+pub struct NotFoundError;
+impl Error for NotFoundError {}
+impl fmt::Display for NotFoundError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "the connection could not be found")
+        write!(f, "the resource could not be found")
     }
 }
 
@@ -183,7 +187,7 @@ pub enum ConnectionActivationError {
     /// Error while retrieving the imported connections
     ImportedConnectionsRetrieval,
     /// Connection to activate could not be found
-    ConnectionNotFound(ConnectionNotFoundError),
+    ConnectionNotFound(NotFoundError),
     /// Activating the connection failed for reasons on the infra level
     CouldNotActivate,
 }
@@ -218,7 +222,7 @@ pub enum ConnectionDeactivationError {
     /// Error while retrieving the currently active connections
     ActiveConnectionsRetrieval,
     /// Connection to deactivate could not be found
-    NotFound(ConnectionNotFoundError),
+    ConnectionNotFound(NotFoundError),
     /// Deactivating the connection failed for reasons on the infra level
     CouldNotDeactivate,
 }
@@ -232,7 +236,7 @@ impl fmt::Display for ConnectionDeactivationError {
             ConnectionDeactivationError::ActiveConnectionsRetrieval => {
                 write!(f, "currently active connections could not be retrieved")
             }
-            ConnectionDeactivationError::NotFound(inner) => {
+            ConnectionDeactivationError::ConnectionNotFound(inner) => {
                 write!(f, "could not deactivate connection: {}", inner)
             }
             ConnectionDeactivationError::CouldNotDeactivate => {

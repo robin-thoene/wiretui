@@ -53,13 +53,13 @@ where
                                 err
                             );
                             match err {
-                                AdapterConnectionDeactivationError::Infrastructure(_i) => {
+                                AdapterConnectionDeactivationError::Infrastructure(_inner) => {
                                     Err(ConnectionDeactivationError::Infra)
                                 }
                                 AdapterConnectionDeactivationError::ActiveConnectionsRetrieval => {
                                     Err(ConnectionDeactivationError::Infra)
                                 }
-                                AdapterConnectionDeactivationError::NotFound(_n) => {
+                                AdapterConnectionDeactivationError::ConnectionNotFound(_inner) => {
                                     Err(ConnectionDeactivationError::NotFound)
                                 }
                                 AdapterConnectionDeactivationError::CouldNotDeactivate => {

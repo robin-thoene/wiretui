@@ -56,7 +56,7 @@ where
                             AdapterConnectionDeactivationError::ActiveConnectionsRetrieval => {
                                 Err(ConnectionRemovalError::Infra)
                             }
-                            AdapterConnectionDeactivationError::NotFound(_inner) => {
+                            AdapterConnectionDeactivationError::ConnectionNotFound(_inner) => {
                                 Err(ConnectionRemovalError::NotFound)
                             }
                             AdapterConnectionDeactivationError::CouldNotDeactivate => {
