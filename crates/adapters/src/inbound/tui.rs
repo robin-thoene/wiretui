@@ -7,12 +7,13 @@ use crate::inbound::tui::custom_widgets::{
     status_bar::StatusBar,
     user_input_popup::UserInputPopup,
 };
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
+use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use domain::models::WireGuardConnection;
 use ports::inbound::{
     activate_connection_port::ActivateConnectionPort,
     deactivate_connection_port::DeactivateConnectionPort,
     import_connection_port::ImportConnectionPort, list_connections_port::ListConnectionsPort,
+    remove_connection_port::RemoveConnectionPort,
 };
 use ratatui::{
     Frame,
@@ -23,12 +24,13 @@ use ratatui::{
 use std::io;
 
 #[derive(Debug)]
-pub struct App<'a, L, A, D, I>
+pub struct App<'a, L, A, D, I, R>
 where
     L: ListConnectionsPort,
     A: ActivateConnectionPort,
     D: DeactivateConnectionPort,
     I: ImportConnectionPort,
+    R: RemoveConnectionPort,
 {
     show_help: bool,
     show_import_popup: bool,
@@ -39,6 +41,7 @@ where
     activate_connection_port: A,
     deactivate_connection_port: D,
     import_connection_port: I,
+    remove_connection_port: R,
 }
 
 #[derive(Debug, Default)]
@@ -47,18 +50,20 @@ struct Connections {
     connection_list_state: ConnectionListState,
 }
 
-impl<'a, L, A, D, I> App<'a, L, A, D, I>
+impl<'a, L, A, D, I, R> App<'a, L, A, D, I, R>
 where
     L: ListConnectionsPort,
     A: ActivateConnectionPort,
     D: DeactivateConnectionPort,
     I: ImportConnectionPort,
+    R: RemoveConnectionPort,
 {
     pub fn new(
         list_connections_port: L,
         activate_connection_port: A,
         deactivate_connection_port: D,
         import_connection_port: I,
+        remove_connection_port: R,
     ) -> Self {
         Self {
             show_help: bool::default(),
@@ -70,6 +75,7 @@ where
             activate_connection_port,
             deactivate_connection_port,
             import_connection_port,
+            remove_connection_port,
         }
     }
 
@@ -173,6 +179,9 @@ where
                 .select_previous(),
             KeyCode::Char(' ') => self.toggle_selected_connection(),
             KeyCode::Char('i') if !self.show_import_popup => self.open_import_popup(),
+            KeyCode::Char('d') if key_event.modifiers.contains(KeyModifiers::CONTROL) => {
+                self.remove_selected_connection();
+            }
             _ => {}
         }
     }
@@ -255,7 +264,7 @@ where
         if let Some(idx) = idx {
             let selected = self.connections.value.get(idx);
             if let Some(conn) = selected {
-                if conn.get_is_active() == &true {
+                if *conn.get_is_active() {
                     // Attempt to deactivate the selected connection if it is already active
                     let res = self.deactivate_connection_port.deactivate(conn);
                     if let Err(error) = res {
@@ -274,14 +283,32 @@ where
             }
         }
     }
+
+    /// Remove the currently selected connection
+    fn remove_selected_connection(&mut self) {
+        let idx = self.connections.connection_list_state.list_state.selected();
+        if let Some(idx) = idx {
+            let selected = self.connections.value.get(idx);
+            if let Some(conn) = selected {
+                let result = self.remove_connection_port.remove(conn);
+                if let Err(error) = result {
+                    log::error!("{}", error);
+                    // TODO: display error in UI
+                } else {
+                    self.refresh_connection_list();
+                }
+            }
+        }
+    }
 }
 
-impl<'a, L, A, D, I> Widget for &mut App<'a, L, A, D, I>
+impl<'a, L, A, D, I, R> Widget for &mut App<'a, L, A, D, I, R>
 where
     L: ListConnectionsPort,
     A: ActivateConnectionPort,
     D: DeactivateConnectionPort,
     I: ImportConnectionPort,
+    R: RemoveConnectionPort,
 {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let main_layout = Layout::default()

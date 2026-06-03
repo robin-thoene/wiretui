@@ -19,7 +19,7 @@ You will need to use a **Linux** based operating system using the **NetworkManag
 - [x] activate a connection
 - [x] deactivate a connection
 - [x] import a new connection from a config file
-- [ ] remove an existing connection ([#6](https://github.com/robin-thoene/wiretui/issues/6))
+- [x] remove an existing connection
 - [ ] search connection list ([#13](https://github.com/robin-thoene/wiretui/issues/13))
 
 ## Installation
@@ -48,7 +48,7 @@ wiretui
 
 `k`: move up
 
-`SPACE`: toggle a connection
+`SPACE`: toggle the selected connection
 
 `?`: open the help menu
 
@@ -56,17 +56,9 @@ wiretui
 
 `q`: quit application
 
-### Importing connections
+`i`: open the menu to import a new connection
 
-Until this feature is integrated into wiretui, you can import connections from WireGuard config
-files like so:
-
-```shell
-# Import from config using the CLI of the NetworkManager
-nmcli connection import type wireguard file ./your_wireguard_config_file.conf
-# Use this command if you want to disable the autoconnect functionality
-nmcli connection modify IMPORTED_CONNECTION_NAME connection.autoconnect no
-```
+`CTRL+d`: delete the selected connection
 
 ## Local development
 

@@ -6,7 +6,7 @@ use crate::outbound::dbus_repository::{
 use domain::models::WireGuardConnection;
 use ports::outbound::wireguard_port::{
     ConnectionActivationError, ConnectionDeactivationError, ConnectionImportError,
-    ConnectionNotFoundError, GetConnectionsError, InfrastructureError, WireGuardPort,
+    ConnectionRemovalError, GetConnectionsError, InfrastructureError, NotFoundError, WireGuardPort,
 };
 use std::{
     path::Path,
@@ -152,9 +152,7 @@ impl WireGuardPort for WireGuardNmRepository {
             }
         } else {
             log::warn!("could not find connection");
-            Err(ConnectionActivationError::ConnectionNotFound(
-                ConnectionNotFoundError,
-            ))
+            Err(ConnectionActivationError::ConnectionNotFound(NotFoundError))
         }
     }
 
@@ -196,8 +194,8 @@ impl WireGuardPort for WireGuardNmRepository {
             }
         } else {
             log::warn!("could not find active connection for provided id");
-            Err(ConnectionDeactivationError::NotFound(
-                ConnectionNotFoundError,
+            Err(ConnectionDeactivationError::ConnectionNotFound(
+                NotFoundError,
             ))
         }
     }
@@ -206,7 +204,7 @@ impl WireGuardPort for WireGuardNmRepository {
         log::info!("importing connection from path {:?}", config_file_path);
         if !config_file_path.exists() {
             log::error!("config file {:?} does not exist", config_file_path);
-            return Err(ConnectionImportError::FileNotFound);
+            return Err(ConnectionImportError::FileNotFound(NotFoundError));
         }
         let conn_name = config_file_path.file_stem();
         if let Some(conn_name) = conn_name.and_then(|x| x.to_str()) {
@@ -271,6 +269,38 @@ impl WireGuardPort for WireGuardNmRepository {
                 config_file_path
             );
             Err(ConnectionImportError::CouldNotResolveConnectionId)
+        }
+    }
+
+    fn remove_connection(&self, id: &str) -> Result<(), ConnectionRemovalError> {
+        log::info!("removing the connection with id {}", id);
+        let connections = self.get_imported_connections_internal().map_err(|err| {
+            log::error!("error {} getting connections from D-Bus", err);
+            ConnectionRemovalError::ImportedConnectionsRetrieval
+        })?;
+        let conn = connections.iter().find(|x| x.id == id);
+        if let Some(conn) = conn {
+            let proxy =
+                NetworkManagerConnectionProxyBlocking::new(&self.dbus_connection, &conn.path)
+                    .map_err(|_| ConnectionRemovalError::Infrastructure(InfrastructureError))?;
+            let result = proxy.delete();
+            match result {
+                Ok(_) => {
+                    log::info!("removed connection");
+                    Ok(())
+                }
+                Err(err) => {
+                    log::error!(
+                        "error deleting the connection at path {} with error {}",
+                        &conn.path,
+                        err
+                    );
+                    Err(ConnectionRemovalError::Infrastructure(InfrastructureError))
+                }
+            }
+        } else {
+            log::warn!("could not find connection");
+            Err(ConnectionRemovalError::ConnectionNotFound(NotFoundError))
         }
     }
 }

@@ -66,6 +66,7 @@ mod list_connections_usecase_tests {
             Some(GetConnectionsError::Infrastructure(InfrastructureError)),
             None,
             None,
+            None,
         );
         // Act
         let result = ListConnectionsUseCase::new(&repo_mock).get();

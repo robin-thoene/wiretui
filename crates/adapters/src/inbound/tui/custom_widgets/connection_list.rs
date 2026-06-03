@@ -46,11 +46,7 @@ impl<'a> StatefulWidget for ConnectionList<'a> {
             .connections
             .iter()
             .map(|item| {
-                let active_indicator = if item.get_is_active() == &true {
-                    "*"
-                } else {
-                    ""
-                };
+                let active_indicator = if *item.get_is_active() { "*" } else { "" };
                 ListItem::from(format!("{} {}", item.get_id(), active_indicator))
             })
             .collect();

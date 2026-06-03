@@ -22,6 +22,7 @@ impl Widget for KeymapsPopup {
             Line::from("  k          Scroll up"),
             Line::from("SPACE        Toggle connection"),
             Line::from("  i          Import a new connection"),
+            Line::from("Ctrl+d       Delete the selected connection"),
         ];
         let help_popup_content = Paragraph::new(keymaps).block(
             Block::bordered()
@@ -40,7 +41,7 @@ impl Widget for KeymapsPopup {
 ///
 /// * `area` - The area that will partially be covered by the popup
 fn popup_area(area: Rect) -> Rect {
-    let vertical = Layout::vertical([Constraint::Length(8)]).flex(Flex::Center);
+    let vertical = Layout::vertical([Constraint::Length(9)]).flex(Flex::Center);
     let horizontal = Layout::horizontal([Constraint::Length(60)]).flex(Flex::Center);
     let [area] = vertical.areas(area);
     let [area] = horizontal.areas(area);

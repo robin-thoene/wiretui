@@ -42,6 +42,7 @@ pub trait NetworkManagerSettings {
 )]
 pub trait NetworkManagerConnection {
     fn get_settings(&self) -> zbus::Result<HashMap<String, HashMap<String, OwnedValue>>>;
+    fn delete(&self) -> zbus::Result<()>;
 }
 
 #[doc = "Used to automatically generate access to a NetworkManager active connection using zbus"]

@@ -23,7 +23,7 @@ impl WireGuardConnection {
     /// let id = "unique-identifier";
     /// let connection = WireGuardConnection::new(id.to_string(), false);
     /// assert_eq!(connection.get_id(), id);
-    /// assert_eq!(connection.get_is_active(), &false);
+    /// assert_eq!(*connection.get_is_active(), false);
     /// ```
     pub fn new(id: String, is_active: bool) -> Self {
         Self { id, is_active }
@@ -53,7 +53,7 @@ impl WireGuardConnection {
     ///
     /// let id = "unique-identifier";
     /// let connection = WireGuardConnection::new(id.to_string(), true);
-    /// assert_eq!(connection.get_is_active(), &true);
+    /// assert_eq!(*connection.get_is_active(), true);
     /// ```
     pub fn get_is_active(&self) -> &bool {
         &self.is_active
