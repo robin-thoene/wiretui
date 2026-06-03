@@ -20,6 +20,8 @@ pub struct WireGuardNmRepoMock {
     deactivate_connection_error: Option<AdapterConnectionDeactivationError>,
     /// The error type the mock shall return when the fn to import a connection is invoked
     import_connection_error: Option<AdapterConnectionConnectionImportError>,
+    /// The error type the mock shall return when the fn to remove a connection is invoked
+    remove_connection_error: Option<AdapterConnectionRemovalError>,
 }
 
 /// Mock implementation of the WireGuardNmRepo
@@ -31,6 +33,7 @@ impl WireGuardNmRepoMock {
             get_imported_connections_error: None,
             deactivate_connection_error: None,
             import_connection_error: None,
+            remove_connection_error: None,
         }
     }
 
@@ -41,12 +44,14 @@ impl WireGuardNmRepoMock {
         get_imported_connections_error: Option<AdapterGetConnectionsError>,
         deactivate_connection_error: Option<AdapterConnectionDeactivationError>,
         import_connection_error: Option<AdapterConnectionConnectionImportError>,
+        remove_connection_error: Option<AdapterConnectionRemovalError>,
     ) -> Self {
         Self {
             available_connections: RefCell::new(initial_connections),
             get_imported_connections_error,
             deactivate_connection_error,
             import_connection_error,
+            remove_connection_error,
         }
     }
 
@@ -83,8 +88,20 @@ impl WireGuardNmRepoMock {
     }
 
     /// Internally add a new connection to the mock state
-    pub fn add_connection(&self, conn: WireGuardConnection) {
+    pub fn add_connection_internal(&self, conn: WireGuardConnection) {
         self.available_connections.borrow_mut().push(conn);
+    }
+
+    /// Internally remove a connection to the mock state
+    pub fn remove_connection_internal(&self, id: &str) {
+        let idx = self
+            .available_connections
+            .borrow_mut()
+            .iter()
+            .position(|x| x.get_id() == id);
+        if let Some(idx) = idx {
+            self.available_connections.borrow_mut().remove(idx);
+        }
     }
 }
 
@@ -174,12 +191,15 @@ impl WireGuardPort for WireGuardNmRepoMock {
             .split('.')
             .next()
             .unwrap();
-        self.add_connection(WireGuardConnection::new(id.to_string(), true));
+        self.add_connection_internal(WireGuardConnection::new(id.to_string(), true));
         Ok(id.to_string())
     }
 
-    fn remove_connection(&self, _id: &str) -> Result<(), AdapterConnectionRemovalError> {
-        // TODO: implement
+    fn remove_connection(&self, id: &str) -> Result<(), AdapterConnectionRemovalError> {
+        if let Some(err) = self.remove_connection_error {
+            return Err(err);
+        }
+        self.remove_connection_internal(id);
         Ok(())
     }
 }

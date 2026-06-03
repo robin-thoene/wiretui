@@ -163,6 +163,7 @@ mod import_connection_usecase_tests {
             None,
             Some(AdapterConnectionDeactivationError::CouldNotDeactivate),
             None,
+            None,
         );
         let use_case = ImportConnectionUsecase::new(&repo_mock);
         // Act
@@ -187,6 +188,7 @@ mod import_connection_usecase_tests {
             None,
             None,
             Some(AdapterConnectionImportError::CouldNotModify),
+            None,
         );
         let use_case = ImportConnectionUsecase::new(&repo_mock);
         // Act
