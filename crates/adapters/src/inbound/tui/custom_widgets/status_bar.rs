@@ -4,10 +4,10 @@ use ratatui::{
     widgets::{Block, Widget},
 };
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct StatusBar {}
 
-impl Widget for StatusBar {
+impl Widget for &mut StatusBar {
     fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
     where
         Self: Sized,

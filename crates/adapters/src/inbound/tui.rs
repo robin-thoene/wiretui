@@ -36,7 +36,9 @@ where
     show_import_popup: bool,
     exit: bool,
     connections: Connections,
+    help_popup: KeymapsPopup,
     import_popup: UserInputPopup<'a>,
+    status_bar: StatusBar,
     list_connections_port: L,
     activate_connection_port: A,
     deactivate_connection_port: D,
@@ -70,7 +72,9 @@ where
             show_import_popup: bool::default(),
             exit: bool::default(),
             connections: Connections::default(),
+            help_popup: KeymapsPopup::default(),
             import_popup: UserInputPopup::default(),
+            status_bar: StatusBar::default(),
             list_connections_port,
             activate_connection_port,
             deactivate_connection_port,
@@ -326,12 +330,10 @@ where
             &mut self.connections.connection_list_state,
         );
 
-        let status_bar = StatusBar::default();
-        status_bar.render(main_layout[1], buf);
+        self.status_bar.render(main_layout[1], buf);
 
         if self.show_help {
-            let help_popup = KeymapsPopup::default();
-            help_popup.render(area, buf);
+            self.help_popup.render(area, buf);
         }
 
         if self.show_import_popup {

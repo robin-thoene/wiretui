@@ -6,10 +6,10 @@ use ratatui::{
 };
 
 /// Popup that displays all available keymaps for the entire application
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct KeymapsPopup {}
 
-impl Widget for KeymapsPopup {
+impl Widget for &mut KeymapsPopup {
     fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
     where
         Self: Sized,
