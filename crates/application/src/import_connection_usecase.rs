@@ -35,41 +35,65 @@ where
             return Err(ConnectionImportError::FileNotFound);
         }
         // TODO: validate the content of the conf file to verify it is a wireguard config
-        let id = self
-            .wireguard_port
-            .import_from_file(&config_file_path)
-            .map_err(|err| match err {
-                AdapterConnectionImportError::Infrastructure(infrastructure_error) => {
-                    log::error!(
-                        "failed to import the connection {:?} with underlying error {}",
-                        config_file_path,
-                        infrastructure_error
-                    );
-                    ConnectionImportError::Infra
-                }
-                AdapterConnectionImportError::FileNotFound(_inner) => {
-                    log::error!("{}", not_found_msg);
-                    ConnectionImportError::FileNotFound
-                }
-                AdapterConnectionImportError::CouldNotResolveConnectionId => {
-                    log::error!(
-                        "config file {:?} is not a valid WireGuard config file",
-                        config_file_path
-                    );
-                    ConnectionImportError::InvalidConfig
-                }
-                AdapterConnectionImportError::CouldNotModify => {
-                    log::error!("failed to modify the imported connection");
-                    ConnectionImportError::CouldNotModify
-                }
-            })?;
-        let deactivation_result = self.wireguard_port.deactivate_connection(&id);
-        match deactivation_result {
-            Ok(_) => Ok(()),
-            Err(_) => {
-                log::error!("failed to deactivate the newly imported connection {}", id);
-                Err(ConnectionImportError::CouldNotModify)
+        if let Some(expected_id) = config_file_path.file_stem().and_then(|x| x.to_str()) {
+            let connections = self
+                .wireguard_port
+                .get_imported_connections()
+                .map_err(|_e| ConnectionImportError::Infra)?;
+            let existing_connection_with_id =
+                connections.iter().find(|x| x.get_id() == expected_id);
+            if let Some(conn) = existing_connection_with_id {
+                log::error!(
+                    "error importing connection, cause it already exists {:?}",
+                    conn
+                );
+                return Err(ConnectionImportError::AlreadyExists);
             }
+            let id = self
+                .wireguard_port
+                .import_from_file(&config_file_path)
+                .map_err(|err| match err {
+                    AdapterConnectionImportError::Infrastructure(infrastructure_error) => {
+                        log::error!(
+                            "failed to import the connection {:?} with underlying error {}",
+                            config_file_path,
+                            infrastructure_error
+                        );
+                        ConnectionImportError::Infra
+                    }
+                    AdapterConnectionImportError::FileNotFound(_inner) => {
+                        log::error!("{}", not_found_msg);
+                        ConnectionImportError::FileNotFound
+                    }
+                    AdapterConnectionImportError::CouldNotResolveConnectionId => {
+                        log::error!(
+                            "config file {:?} is not a valid WireGuard config file",
+                            config_file_path
+                        );
+                        ConnectionImportError::InvalidConfig
+                    }
+                    AdapterConnectionImportError::CouldNotModify => {
+                        log::error!("failed to modify the imported connection");
+                        ConnectionImportError::CouldNotModify
+                    }
+                })?;
+            if id != expected_id {
+                log::warn!(
+                    "newly imported connection id {} differs from expected id {}",
+                    id,
+                    expected_id
+                );
+            }
+            let deactivation_result = self.wireguard_port.deactivate_connection(&id);
+            match deactivation_result {
+                Ok(_) => Ok(()),
+                Err(_) => {
+                    log::error!("failed to deactivate the newly imported connection {}", id);
+                    Err(ConnectionImportError::CouldNotModify)
+                }
+            }
+        } else {
+            Err(ConnectionImportError::InvalidConfig)
         }
     }
 }
@@ -78,6 +102,7 @@ where
 mod import_connection_usecase_tests {
     use super::*;
     use crate::testing::*;
+    use domain::models::WireGuardConnection;
     use ports::inbound::import_connection_port::ConnectionImportError;
     use ports::outbound::wireguard_port::{
         ConnectionDeactivationError as AdapterConnectionDeactivationError,
@@ -195,5 +220,27 @@ mod import_connection_usecase_tests {
         let result = use_case.import_from_file(&test_file_path);
         // Assert
         assert!(result.is_err_and(|err| err == ConnectionImportError::CouldNotModify));
+    }
+
+    /// Test that ensures that a connection can not be imported if another one with the same ID
+    /// already exists
+    #[test]
+    fn error_connection_with_id_already_exists() {
+        // Arrange
+        let connection_id = "mock_valid_wg";
+        let test_file_path = format!(
+            "{}/tests/data/{}.conf",
+            env!("CARGO_MANIFEST_DIR"),
+            connection_id
+        );
+        let repo_mock = WireGuardNmRepoMock::new(vec![WireGuardConnection::new(
+            connection_id.to_string(),
+            false,
+        )]);
+        let use_case = ImportConnectionUsecase::new(&repo_mock);
+        // Act
+        let result = use_case.import_from_file(&test_file_path);
+        // Assert
+        assert!(result.is_err_and(|err| err == ConnectionImportError::AlreadyExists));
     }
 }
