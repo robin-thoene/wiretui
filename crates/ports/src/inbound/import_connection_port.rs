@@ -23,6 +23,7 @@ pub enum ConnectionImportError {
     FileNotFound,
     InvalidConfig,
     CouldNotModify,
+    AlreadyExists,
 }
 impl Error for ConnectionImportError {}
 impl fmt::Display for ConnectionImportError {
@@ -33,6 +34,9 @@ impl fmt::Display for ConnectionImportError {
             ConnectionImportError::InvalidConfig => write!(f, "the config file is not valid"),
             ConnectionImportError::CouldNotModify => {
                 write!(f, "the imported config could not be modified")
+            }
+            ConnectionImportError::AlreadyExists => {
+                write!(f, "this connection is already imported")
             }
         }
     }
