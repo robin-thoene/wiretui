@@ -23,6 +23,7 @@ impl Widget for &mut KeymapsPopup {
             Line::from("SPACE        Toggle connection"),
             Line::from("  i          Import a new connection"),
             Line::from("Ctrl+d       Delete the selected connection"),
+            Line::from("  /          Search the connection list"),
         ];
         let help_popup_content = Paragraph::new(keymaps).block(
             Block::bordered()

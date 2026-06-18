@@ -1,8 +1,9 @@
+use crate::inbound::tui::styles::HIGHLIGHT_STYLE;
 use crossterm::event::KeyEvent;
 use ratatui::{
-    layout::{Constraint, Flex, Layout, Rect},
+    layout::{Alignment, Constraint, Flex, Layout, Rect},
     style::Style,
-    widgets::{Block, Borders, Widget},
+    widgets::{Block, BorderType, Widget},
 };
 use ratatui_textarea::TextArea;
 
@@ -39,8 +40,13 @@ impl<'a> Widget for &mut UserInputPopup<'a> {
         Self: Sized,
     {
         let area = popup_area(area);
-        self.textarea
-            .set_block(Block::default().borders(Borders::ALL));
+        self.textarea.set_block(
+            Block::bordered()
+                .border_style(HIGHLIGHT_STYLE)
+                .border_type(BorderType::Thick)
+                .title(" Import ")
+                .title_alignment(Alignment::Center),
+        );
         self.textarea.set_cursor_line_style(Style::default());
         self.textarea
             .set_placeholder_text("Enter the path to your config file to import ...");
