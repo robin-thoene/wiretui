@@ -6,10 +6,10 @@ use ratatui::{
 };
 
 /// Popup that displays all available keymaps for the entire application
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct KeymapsPopup {}
 
-impl Widget for KeymapsPopup {
+impl Widget for &mut KeymapsPopup {
     fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
     where
         Self: Sized,
@@ -23,6 +23,7 @@ impl Widget for KeymapsPopup {
             Line::from("SPACE        Toggle connection"),
             Line::from("  i          Import a new connection"),
             Line::from("Ctrl+d       Delete the selected connection"),
+            Line::from("  /          Search the connection list"),
         ];
         let help_popup_content = Paragraph::new(keymaps).block(
             Block::bordered()

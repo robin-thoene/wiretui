@@ -1,8 +1,9 @@
+use crate::inbound::tui::styles::HIGHLIGHT_STYLE;
 use crossterm::event::KeyEvent;
 use ratatui::{
-    layout::{Constraint, Flex, Layout, Rect},
+    layout::{Alignment, Constraint, Flex, Layout, Rect},
     style::Style,
-    widgets::{Block, Borders, Widget},
+    widgets::{Block, BorderType, Widget},
 };
 use ratatui_textarea::TextArea;
 
@@ -10,9 +11,20 @@ use ratatui_textarea::TextArea;
 #[derive(Debug, Default)]
 pub struct UserInputPopup<'a> {
     textarea: TextArea<'a>,
+    title: &'a str,
+    placeholder: &'a str,
 }
 
 impl<'a> UserInputPopup<'a> {
+    /// Create a new popup with custom title and placeholder
+    pub fn new(title: &'a str, placeholder: &'a str) -> Self {
+        Self {
+            textarea: TextArea::default(),
+            title,
+            placeholder,
+        }
+    }
+
     /// Handles user key events
     pub fn handle_key_event(&mut self, key_event: KeyEvent) {
         log::debug!(
@@ -39,11 +51,15 @@ impl<'a> Widget for &mut UserInputPopup<'a> {
         Self: Sized,
     {
         let area = popup_area(area);
-        self.textarea
-            .set_block(Block::default().borders(Borders::ALL));
+        self.textarea.set_block(
+            Block::bordered()
+                .border_style(HIGHLIGHT_STYLE)
+                .border_type(BorderType::Thick)
+                .title(format!(" {} ", self.title))
+                .title_alignment(Alignment::Center),
+        );
         self.textarea.set_cursor_line_style(Style::default());
-        self.textarea
-            .set_placeholder_text("Enter the path to your config file to import ...");
+        self.textarea.set_placeholder_text(self.placeholder);
         self.textarea.render(area, buf);
     }
 }

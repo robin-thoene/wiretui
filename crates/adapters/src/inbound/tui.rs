@@ -23,6 +23,16 @@ use ratatui::{
 };
 use std::io;
 
+#[derive(Default, Debug, PartialEq, Eq)]
+enum AppMode {
+    #[default]
+    List,
+    Keymaps,
+    Import,
+    Search,
+    Exit,
+}
+
 #[derive(Debug)]
 pub struct App<'a, L, A, D, I, R>
 where
@@ -32,11 +42,11 @@ where
     I: ImportConnectionPort,
     R: RemoveConnectionPort,
 {
-    show_help: bool,
-    show_import_popup: bool,
-    exit: bool,
+    mode: AppMode,
     connections: Connections,
+    keymaps_popup: KeymapsPopup,
     import_popup: UserInputPopup<'a>,
+    status_bar: StatusBar<'a>,
     list_connections_port: L,
     activate_connection_port: A,
     deactivate_connection_port: D,
@@ -66,11 +76,14 @@ where
         remove_connection_port: R,
     ) -> Self {
         Self {
-            show_help: bool::default(),
-            show_import_popup: bool::default(),
-            exit: bool::default(),
+            mode: AppMode::default(),
             connections: Connections::default(),
-            import_popup: UserInputPopup::default(),
+            keymaps_popup: KeymapsPopup::default(),
+            import_popup: UserInputPopup::new(
+                "Import",
+                "Enter the path to your config file to import ...",
+            ),
+            status_bar: StatusBar::default(),
             list_connections_port,
             activate_connection_port,
             deactivate_connection_port,
@@ -82,7 +95,7 @@ where
     pub fn run(&mut self) -> io::Result<()> {
         let mut terminal = ratatui::init();
         self.init_connection_list();
-        while !self.exit {
+        while self.mode != AppMode::Exit {
             terminal.draw(|frame| self.draw(frame))?;
             self.handle_events()?;
         }
@@ -143,7 +156,42 @@ where
     /// * `key_event` - The received key event
     fn handle_key_event(&mut self, key_event: KeyEvent) {
         log::debug!("user pressed '{}'", key_event.code);
-        if self.show_import_popup {
+        if self.mode == AppMode::Search {
+            match key_event.code {
+                KeyCode::Esc => {
+                    self.status_bar.hide_search();
+                    self.mode = AppMode::default();
+                }
+                KeyCode::Enter => {
+                    let search_value = self.status_bar.get_text();
+                    if let Some(search_value) = search_value
+                        && !search_value.is_empty()
+                    {
+                        log::debug!("user submitted search value '{}'", search_value);
+                        self.connections.value = self
+                            .list_connections_port
+                            .get()
+                            .unwrap_or(vec![])
+                            .iter()
+                            .filter(|x| x.get_id().contains(search_value))
+                            .cloned()
+                            .collect::<Vec<WireGuardConnection>>();
+                    } else {
+                        log::debug!("user submitted an empty search value value");
+                        self.refresh_connection_list();
+                        self.status_bar.hide_search();
+                    }
+                    self.mode = AppMode::default();
+                    self.connections
+                        .connection_list_state
+                        .list_state
+                        .select_first();
+                }
+                _ => self.status_bar.handle_key_event(key_event),
+            }
+            return;
+        }
+        if self.mode == AppMode::Import {
             match key_event.code {
                 KeyCode::Esc => self.close_import_popup(),
                 KeyCode::Enter => self.import_new_connection(),
@@ -159,14 +207,14 @@ where
             self.exit();
             return;
         }
-        if self.show_help {
+        if self.mode == AppMode::Keymaps {
             if key_event.code == KeyCode::Esc {
                 self.close_help();
             }
             return;
         }
         match key_event.code {
-            KeyCode::Char('?') if !self.show_help => self.open_help(),
+            KeyCode::Char('?') if self.mode != AppMode::Keymaps => self.open_help(),
             KeyCode::Char('j') => self
                 .connections
                 .connection_list_state
@@ -178,9 +226,13 @@ where
                 .list_state
                 .select_previous(),
             KeyCode::Char(' ') => self.toggle_selected_connection(),
-            KeyCode::Char('i') if !self.show_import_popup => self.open_import_popup(),
+            KeyCode::Char('i') if self.mode != AppMode::Import => self.open_import_popup(),
             KeyCode::Char('d') if key_event.modifiers.contains(KeyModifiers::CONTROL) => {
                 self.remove_selected_connection();
+            }
+            KeyCode::Char('/') if self.mode != AppMode::Search => {
+                self.status_bar.show_search();
+                self.mode = AppMode::Search;
             }
             _ => {}
         }
@@ -189,31 +241,31 @@ where
     /// Close the application
     fn exit(&mut self) {
         log::info!("triggering application shutdown");
-        self.exit = true;
+        self.mode = AppMode::Exit;
     }
 
     /// Open the help menu i.e. the keymaps popup
     fn open_help(&mut self) {
         log::info!("showing the help menu");
-        self.show_help = true;
+        self.mode = AppMode::Keymaps;
     }
 
     /// Close the help menu i.e. the keymaps popup
     fn close_help(&mut self) {
         log::info!("closing the help menu");
-        self.show_help = false
+        self.mode = AppMode::default();
     }
 
     /// Open the popup to get the user input for importing new connections
     fn open_import_popup(&mut self) {
         log::info!("showing the import popup");
-        self.show_import_popup = true;
+        self.mode = AppMode::Import;
     }
 
     /// Close the popup to get the user input for importing new connections
     fn close_import_popup(&mut self) {
         log::info!("closing the import popup");
-        self.show_import_popup = false;
+        self.mode = AppMode::default();
         self.import_popup.clear();
     }
 
@@ -317,7 +369,7 @@ where
             .split(area);
 
         let connection_list = ConnectionList {
-            highlight: !self.show_help,
+            highlight: self.mode == AppMode::List,
             connections: &self.connections.value,
         };
         connection_list.render(
@@ -326,15 +378,13 @@ where
             &mut self.connections.connection_list_state,
         );
 
-        let status_bar = StatusBar::default();
-        status_bar.render(main_layout[1], buf);
+        self.status_bar.render(main_layout[1], buf);
 
-        if self.show_help {
-            let help_popup = KeymapsPopup::default();
-            help_popup.render(area, buf);
+        if self.mode == AppMode::Keymaps {
+            self.keymaps_popup.render(area, buf);
         }
 
-        if self.show_import_popup {
+        if self.mode == AppMode::Import {
             self.import_popup.render(area, buf);
         }
     }

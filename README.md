@@ -20,7 +20,7 @@ You will need to use a **Linux** based operating system using the **NetworkManag
 - [x] deactivate a connection
 - [x] import a new connection from a config file
 - [x] remove an existing connection
-- [ ] search connection list ([#13](https://github.com/robin-thoene/wiretui/issues/13))
+- [x] search connection list
 
 ## Installation
 
