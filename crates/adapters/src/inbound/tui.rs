@@ -165,8 +165,17 @@ where
                         && !search_value.is_empty()
                     {
                         log::debug!("user submitted search value '{}'", search_value);
-                        // TODO: do smth with the value
+                        self.connections.value = self
+                            .list_connections_port
+                            .get()
+                            .unwrap_or(vec![])
+                            .iter()
+                            .filter(|x| x.get_id().contains(search_value))
+                            .cloned()
+                            .collect::<Vec<WireGuardConnection>>();
                     } else {
+                        log::debug!("user submitted an empty search value value");
+                        self.refresh_connection_list();
                         self.status_bar.hide_search();
                     }
                     self.mode = AppMode::default();

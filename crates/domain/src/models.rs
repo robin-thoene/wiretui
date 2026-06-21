@@ -1,5 +1,5 @@
 /// Represents a single WireGuard VPN connection
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct WireGuardConnection {
     /// The identifier of the connection
     id: String,
