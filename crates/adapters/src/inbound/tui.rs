@@ -154,11 +154,24 @@ where
     fn handle_key_event(&mut self, key_event: KeyEvent) {
         log::debug!("user pressed '{}'", key_event.code);
         if self.mode == AppMode::Search {
-            if key_event.code == KeyCode::Esc {
-                self.status_bar.hide_search();
-                self.mode = AppMode::default();
-            } else {
-                self.status_bar.handle_key_event(key_event);
+            match key_event.code {
+                KeyCode::Esc => {
+                    self.status_bar.hide_search();
+                    self.mode = AppMode::default();
+                }
+                KeyCode::Enter => {
+                    let search_value = self.status_bar.get_text();
+                    if let Some(search_value) = search_value
+                        && !search_value.is_empty()
+                    {
+                        log::debug!("user submitted search value '{}'", search_value);
+                        // TODO: do smth with the value
+                    } else {
+                        self.status_bar.hide_search();
+                    }
+                    self.mode = AppMode::default();
+                }
+                _ => self.status_bar.handle_key_event(key_event),
             }
             return;
         }
