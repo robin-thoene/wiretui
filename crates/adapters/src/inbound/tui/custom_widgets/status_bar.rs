@@ -50,7 +50,7 @@ impl<'a> Widget for &mut StatusBar<'a> {
         if self.show_search {
             self.search_textarea.set_cursor_line_style(Style::default());
             self.search_textarea
-                .set_placeholder_text("Enter the path to your config file to import ...");
+                .set_placeholder_text("Enter a search term ...");
             self.search_textarea.set_placeholder_style(HIGHLIGHT_STYLE);
             self.search_textarea.render(area, buf);
         }
