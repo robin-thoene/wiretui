@@ -179,6 +179,10 @@ where
                         self.status_bar.hide_search();
                     }
                     self.mode = AppMode::default();
+                    self.connections
+                        .connection_list_state
+                        .list_state
+                        .select_first();
                 }
                 _ => self.status_bar.handle_key_event(key_event),
             }
