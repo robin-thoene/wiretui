@@ -11,9 +11,20 @@ use ratatui_textarea::TextArea;
 #[derive(Debug, Default)]
 pub struct UserInputPopup<'a> {
     textarea: TextArea<'a>,
+    title: &'a str,
+    placeholder: &'a str,
 }
 
 impl<'a> UserInputPopup<'a> {
+    /// Create a new popup with custom title and placeholder
+    pub fn new(title: &'a str, placeholder: &'a str) -> Self {
+        Self {
+            textarea: TextArea::default(),
+            title,
+            placeholder,
+        }
+    }
+
     /// Handles user key events
     pub fn handle_key_event(&mut self, key_event: KeyEvent) {
         log::debug!(
@@ -44,12 +55,11 @@ impl<'a> Widget for &mut UserInputPopup<'a> {
             Block::bordered()
                 .border_style(HIGHLIGHT_STYLE)
                 .border_type(BorderType::Thick)
-                .title(" Import ")
+                .title(format!(" {} ", self.title))
                 .title_alignment(Alignment::Center),
         );
         self.textarea.set_cursor_line_style(Style::default());
-        self.textarea
-            .set_placeholder_text("Enter the path to your config file to import ...");
+        self.textarea.set_placeholder_text(self.placeholder);
         self.textarea.render(area, buf);
     }
 }

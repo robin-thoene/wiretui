@@ -79,7 +79,10 @@ where
             mode: AppMode::default(),
             connections: Connections::default(),
             keymaps_popup: KeymapsPopup::default(),
-            import_popup: UserInputPopup::default(),
+            import_popup: UserInputPopup::new(
+                "Import",
+                "Enter the path to your config file to import ...",
+            ),
             status_bar: StatusBar::default(),
             list_connections_port,
             activate_connection_port,
@@ -228,7 +231,7 @@ where
                 self.remove_selected_connection();
             }
             KeyCode::Char('/') if self.mode != AppMode::Search => {
-                self.status_bar.show_search(); // TODO: improve UX
+                self.status_bar.show_search();
                 self.mode = AppMode::Search;
             }
             _ => {}
