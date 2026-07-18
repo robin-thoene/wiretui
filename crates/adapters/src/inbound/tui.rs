@@ -362,8 +362,8 @@ where
                         self.show_notification(format!("{}", error), NotificationLevel::Error);
                     }
                 }
-                self.refresh_connection_list();
             }
+            self.refresh_connection_list();
         }
     }
 
