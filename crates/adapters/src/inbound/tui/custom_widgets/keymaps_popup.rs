@@ -17,7 +17,7 @@ impl Widget for &mut KeymapsPopup {
             Line::from("Ctrl+d       Delete the selected connection"),
             Line::from("  /          Search the connection list"),
         ];
-        let popup = Popup::new("Help", &keymaps);
+        let popup = Popup::new("Help", &keymaps, None);
         popup.render(area, buf);
     }
 }

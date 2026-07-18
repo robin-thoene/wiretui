@@ -2,6 +2,7 @@ use crate::inbound::tui::styles::HIGHLIGHT_STYLE;
 use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Flex, Layout, Rect},
+    style::Style,
     text::Line,
     widgets::{Block, BorderType, Clear, Paragraph, Widget},
 };
@@ -45,6 +46,7 @@ where
 {
     title: &'a str,
     content: &'a C,
+    custom_border_style: Option<Style>,
 }
 
 impl<'a, C> Popup<'a, C>
@@ -57,8 +59,12 @@ where
     ///
     /// * `title` - The title to display
     /// * `content` - The actual content as a type that is supported to be rendered
-    pub fn new(title: &'a str, content: &'a C) -> Self {
-        Self { title, content }
+    pub fn new(title: &'a str, content: &'a C, custom_border_style: Option<Style>) -> Self {
+        Self {
+            title,
+            content,
+            custom_border_style,
+        }
     }
 
     /// Helper method to draw a new area on top of the given area to use for the popup content
@@ -84,7 +90,7 @@ where
         let area = self.build_popup_area(area);
         Clear.render(area, buf);
         let title_block = Block::bordered()
-            .border_style(HIGHLIGHT_STYLE)
+            .border_style(self.custom_border_style.unwrap_or(HIGHLIGHT_STYLE))
             .border_type(BorderType::Thick)
             .title(format!(" {} ", self.title))
             .title_alignment(Alignment::Center);

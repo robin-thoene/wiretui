@@ -45,7 +45,7 @@ impl<'a> Widget for &mut UserInputPopup<'a> {
     fn render(self, area: Rect, buf: &mut Buffer) {
         self.textarea.set_cursor_line_style(Style::default());
         self.textarea.set_placeholder_text(self.placeholder);
-        let popup = Popup::new(self.title, &self.textarea);
+        let popup = Popup::new(self.title, &self.textarea, None);
         popup.render(area, buf);
     }
 }
