@@ -326,10 +326,13 @@ where
                 );
                 // Try to import a new connection from the given file path
                 let result = self.import_connection_port.import_from_file(user_input);
+                self.close_import_popup();
                 match result {
                     Ok(_) => self.refresh_connection_list(),
                     Err(err) => {
-                        log::error!("error occurred while importing the connection: {}", err)
+                        let msg = "error occurred while importing the connection".to_string();
+                        log::error!("{}: {}", msg, err);
+                        self.show_notification(msg, NotificationLevel::Error);
                     }
                 }
             }
@@ -338,7 +341,6 @@ where
                 "user did not input a value for the path to a config file to import a new connection"
             )
         }
-        self.close_import_popup();
     }
 
     /// Toggle the selected connection. If it is active, deactivate it and vice versa
