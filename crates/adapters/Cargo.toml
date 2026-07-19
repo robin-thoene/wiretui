@@ -1,5 +1,5 @@
 [package]
-name = "adapters"
+name = "wiretui-adapters"
 edition = "2024"
 description = "Implement outbound ports, implement inbound adapters to access the application"
 publish = false
@@ -8,10 +8,13 @@ authors.workspace = true
 license.workspace = true
 repository.workspace = true
 
+[lib]
+name = "adapters"
+
 [dependencies]
-application = { path = "../application" }
-domain = { path = "../domain" }
-ports = { path = "../ports" }
+application = { workspace = true }
+domain = { workspace = true }
+ports = { workspace = true }
 crossterm = { workspace = true }
 ratatui = { workspace = true }
 zbus = { workspace = true }

@@ -3,21 +3,6 @@
 version = 4
 
 [[package]]
-name = "adapters"
-version = "0.0.0"
-dependencies = [
- "application",
- "crossterm",
- "domain",
- "log",
- "ports",
- "ratatui",
- "ratatui-textarea",
- "serde",
- "zbus",
-]
-
-[[package]]
 name = "aho-corasick"
 version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -87,15 +72,6 @@ name = "anyhow"
 version = "1.0.102"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
-
-[[package]]
-name = "application"
-version = "0.0.0"
-dependencies = [
- "domain",
- "log",
- "ports",
-]
 
 [[package]]
 name = "async-broadcast"
@@ -526,10 +502,6 @@ checksum = "d4b8a88685455ed29a21542a33abd9cb6510b6b129abadabdcef0f4c55bc8f61"
 dependencies = [
  "litrs",
 ]
-
-[[package]]
-name = "domain"
-version = "0.0.0"
 
 [[package]]
 name = "either"
@@ -1281,13 +1253,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d8a2f0d8d040d7848a709caf78912debcc3f33ee4b3cac47d73d1e1069e83507"
 dependencies = [
  "portable-atomic",
-]
-
-[[package]]
-name = "ports"
-version = "0.0.0"
-dependencies = [
- "domain",
 ]
 
 [[package]]
@@ -2317,13 +2282,48 @@ dependencies = [
 ]
 
 [[package]]
+name = "wiretui-adapters"
+version = "0.0.0"
+dependencies = [
+ "crossterm",
+ "log",
+ "ratatui",
+ "ratatui-textarea",
+ "serde",
+ "wiretui-application",
+ "wiretui-domain",
+ "wiretui-ports",
+ "zbus",
+]
+
+[[package]]
+name = "wiretui-application"
+version = "0.0.0"
+dependencies = [
+ "log",
+ "wiretui-domain",
+ "wiretui-ports",
+]
+
+[[package]]
 name = "wiretui-bin"
 version = "0.0.0"
 dependencies = [
- "adapters",
- "application",
  "env_logger",
  "log",
+ "wiretui-adapters",
+ "wiretui-application",
+]
+
+[[package]]
+name = "wiretui-domain"
+version = "0.0.0"
+
+[[package]]
+name = "wiretui-ports"
+version = "0.0.0"
+dependencies = [
+ "wiretui-domain",
 ]
 
 [[package]]
