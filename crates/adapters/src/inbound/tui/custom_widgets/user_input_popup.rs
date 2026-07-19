@@ -1,10 +1,6 @@
-use crate::inbound::tui::styles::HIGHLIGHT_STYLE;
+use crate::inbound::tui::custom_widgets::popup::Popup;
 use crossterm::event::KeyEvent;
-use ratatui::{
-    layout::{Alignment, Constraint, Flex, Layout, Rect},
-    style::Style,
-    widgets::{Block, BorderType, Widget},
-};
+use ratatui::{buffer::Buffer, layout::Rect, style::Style, widgets::Widget};
 use ratatui_textarea::TextArea;
 
 /// Popup to get a text input from the user
@@ -46,33 +42,10 @@ impl<'a> UserInputPopup<'a> {
 }
 
 impl<'a> Widget for &mut UserInputPopup<'a> {
-    fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
-    where
-        Self: Sized,
-    {
-        let area = popup_area(area);
-        self.textarea.set_block(
-            Block::bordered()
-                .border_style(HIGHLIGHT_STYLE)
-                .border_type(BorderType::Thick)
-                .title(format!(" {} ", self.title))
-                .title_alignment(Alignment::Center),
-        );
+    fn render(self, area: Rect, buf: &mut Buffer) {
         self.textarea.set_cursor_line_style(Style::default());
         self.textarea.set_placeholder_text(self.placeholder);
-        self.textarea.render(area, buf);
+        let popup = Popup::new(self.title, &self.textarea, None);
+        popup.render(area, buf);
     }
-}
-
-/// Helper method to draw a new area on top of the given area
-///
-/// # Arguments
-///
-/// * `area` - The area that will partially be covered by the popup
-fn popup_area(area: Rect) -> Rect {
-    let vertical = Layout::vertical([Constraint::Length(3)]).flex(Flex::Center);
-    let horizontal = Layout::horizontal([Constraint::Percentage(60)]).flex(Flex::Center);
-    let [area] = vertical.areas(area);
-    let [area] = horizontal.areas(area);
-    area
 }

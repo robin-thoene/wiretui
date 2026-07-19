@@ -1,6 +1,8 @@
 use crate::inbound::tui::styles::HIGHLIGHT_STYLE;
 use crossterm::event::KeyEvent;
 use ratatui::{
+    buffer::Buffer,
+    layout::Rect,
     style::{Style, Stylize},
     text::Line,
     widgets::{Block, Widget},
@@ -43,10 +45,7 @@ impl<'a> StatusBar<'a> {
 }
 
 impl<'a> Widget for &mut StatusBar<'a> {
-    fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
-    where
-        Self: Sized,
-    {
+    fn render(self, area: Rect, buf: &mut Buffer) {
         if self.show_search {
             self.search_textarea.set_cursor_line_style(Style::default());
             self.search_textarea

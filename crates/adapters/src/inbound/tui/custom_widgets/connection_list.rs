@@ -1,6 +1,8 @@
 use crate::inbound::tui::styles::{HIGHLIGHT_STYLE, SELECTED_STYLE};
 use domain::models::WireGuardConnection;
 use ratatui::{
+    buffer::Buffer,
+    layout::Rect,
     style::Style,
     text::Line,
     widgets::{
@@ -23,12 +25,7 @@ pub struct ConnectionListState {
 impl<'a> StatefulWidget for ConnectionList<'a> {
     type State = ConnectionListState;
 
-    fn render(
-        self,
-        area: ratatui::prelude::Rect,
-        buf: &mut ratatui::prelude::Buffer,
-        state: &mut Self::State,
-    ) {
+    fn render(self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
         let config_values_block = Block::new()
             .title(Line::raw(" Available configs ").left_aligned())
             .borders(Borders::all())

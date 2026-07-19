@@ -4,6 +4,7 @@ mod styles;
 use crate::inbound::tui::custom_widgets::{
     connection_list::{ConnectionList, ConnectionListState},
     keymaps_popup::KeymapsPopup,
+    notification_popup::{NotificationLevel, NotificationPopup},
     status_bar::StatusBar,
     user_input_popup::UserInputPopup,
 };
@@ -30,6 +31,7 @@ enum AppMode {
     Keymaps,
     Import,
     Search,
+    ShowNotification,
     Exit,
 }
 
@@ -46,6 +48,7 @@ where
     connections: Connections,
     keymaps_popup: KeymapsPopup,
     import_popup: UserInputPopup<'a>,
+    notification_popup: NotificationPopup,
     status_bar: StatusBar<'a>,
     list_connections_port: L,
     activate_connection_port: A,
@@ -83,6 +86,7 @@ where
                 "Import",
                 "Enter the path to your config file to import ...",
             ),
+            notification_popup: NotificationPopup::default(),
             status_bar: StatusBar::default(),
             list_connections_port,
             activate_connection_port,
@@ -125,7 +129,10 @@ where
                     .select(Some(0));
             }
         } else {
-            // TODO: display error in UI
+            self.show_notification(
+                "Error getting the connections".to_string(),
+                NotificationLevel::Error,
+            );
         }
     }
 
@@ -213,6 +220,12 @@ where
             }
             return;
         }
+        if self.mode == AppMode::ShowNotification {
+            if key_event.code == KeyCode::Esc || key_event.code == KeyCode::Enter {
+                self.close_notification();
+            }
+            return;
+        }
         match key_event.code {
             KeyCode::Char('?') if self.mode != AppMode::Keymaps => self.open_help(),
             KeyCode::Char('j') => self
@@ -269,6 +282,21 @@ where
         self.import_popup.clear();
     }
 
+    /// Displays the current notification
+    fn show_notification(&mut self, message: String, level: NotificationLevel) {
+        self.notification_popup.set_message(message);
+        self.notification_popup.set_level(level);
+        self.mode = AppMode::ShowNotification;
+    }
+
+    /// Dismiss the current notification
+    fn close_notification(&mut self) {
+        self.mode = AppMode::default();
+        self.notification_popup.set_message("".to_string());
+        self.notification_popup
+            .set_level(NotificationLevel::default());
+    }
+
     /// Refresh the list of all connection and it's states
     fn refresh_connection_list(&mut self) {
         // TODO: use a more optimal way to mark successful activated conn as active
@@ -277,7 +305,10 @@ where
             log::debug!("refreshing connection list with the new value: {:?}", conn);
             self.connections.value = conn;
         } else {
-            // TODO: display error in UI
+            self.show_notification(
+                "Error refreshing the connections".to_string(),
+                NotificationLevel::Error,
+            );
         }
     }
 
@@ -295,10 +326,13 @@ where
                 );
                 // Try to import a new connection from the given file path
                 let result = self.import_connection_port.import_from_file(user_input);
+                self.close_import_popup();
                 match result {
                     Ok(_) => self.refresh_connection_list(),
                     Err(err) => {
-                        log::error!("error occurred while importing the connection: {}", err)
+                        let msg = "error occurred while importing the connection".to_string();
+                        log::error!("{}: {}", msg, err);
+                        self.show_notification(msg, NotificationLevel::Error);
                     }
                 }
             }
@@ -307,7 +341,6 @@ where
                 "user did not input a value for the path to a config file to import a new connection"
             )
         }
-        self.close_import_popup();
     }
 
     /// Toggle the selected connection. If it is active, deactivate it and vice versa
@@ -321,18 +354,18 @@ where
                     let res = self.deactivate_connection_port.deactivate(conn);
                     if let Err(error) = res {
                         log::error!("{}", error);
-                        // TODO: display error in UI
+                        self.show_notification(format!("{}", error), NotificationLevel::Error);
                     }
                 } else {
                     // Attempt to activate the selected connection if it is not yet active
                     let res = self.activate_connection_port.activate(conn);
                     if let Err(error) = res {
                         log::error!("{}", error);
-                        // TODO: display error in UI
+                        self.show_notification(format!("{}", error), NotificationLevel::Error);
                     }
                 }
-                self.refresh_connection_list();
             }
+            self.refresh_connection_list();
         }
     }
 
@@ -345,7 +378,7 @@ where
                 let result = self.remove_connection_port.remove(conn);
                 if let Err(error) = result {
                     log::error!("{}", error);
-                    // TODO: display error in UI
+                    self.show_notification(format!("{}", error), NotificationLevel::Error);
                 } else {
                     self.refresh_connection_list();
                 }
@@ -386,6 +419,10 @@ where
 
         if self.mode == AppMode::Import {
             self.import_popup.render(area, buf);
+        }
+
+        if self.mode == AppMode::ShowNotification {
+            self.notification_popup.render(area, buf);
         }
     }
 }
