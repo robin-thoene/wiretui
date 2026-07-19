@@ -6,6 +6,7 @@ publish = false
 version.workspace = true
 authors.workspace = true
 license.workspace = true
+repository.workspace = true
 
 [dependencies]
 domain = { path = "../domain" }
