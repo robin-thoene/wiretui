@@ -2,7 +2,7 @@
 name = "wiretui-bin"
 edition = "2024"
 description = "A minimal keyboard-driven TUI to manage WireGuard VPN connections"
-publish = false
+publish = true
 version.workspace = true
 authors.workspace = true
 license.workspace = true

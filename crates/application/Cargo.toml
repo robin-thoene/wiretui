@@ -2,7 +2,7 @@
 name = "wiretui-application"
 edition = "2024"
 description = "Implement inbound ports, implement business logic"
-publish = false
+publish = true
 version.workspace = true
 authors.workspace = true
 license.workspace = true
