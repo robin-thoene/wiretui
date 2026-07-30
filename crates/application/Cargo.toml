@@ -1,13 +1,17 @@
 [package]
-name = "application"
+name = "wiretui-application"
 edition = "2024"
 description = "Implement inbound ports, implement business logic"
 publish = false
 version.workspace = true
 authors.workspace = true
 license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "application"
 
 [dependencies]
-domain = { path = "../domain" }
-ports = { path = "../ports" }
-log = { workspace = true }
+domain.workspace = true
+ports.workspace = true
+log.workspace = true

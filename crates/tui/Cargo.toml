@@ -6,13 +6,14 @@ publish = false
 version.workspace = true
 authors.workspace = true
 license.workspace = true
+repository.workspace = true
 
 [[bin]]
 name = "wiretui"
 path = "src/main.rs"
 
 [dependencies]
-adapters = { path = "../adapters" }
-application = { path = "../application" }
-env_logger = { workspace = true }
-log = { workspace = true }
+adapters.workspace = true
+application.workspace = true
+env_logger.workspace = true
+log.workspace = true
