@@ -12,12 +12,12 @@ repository.workspace = true
 name = "adapters"
 
 [dependencies]
-application = { workspace = true }
-domain = { workspace = true }
-ports = { workspace = true }
-crossterm = { workspace = true }
-ratatui = { workspace = true }
-zbus = { workspace = true }
-serde = { workspace = true }
-log = { workspace = true }
-ratatui-textarea = { workspace = true }
+application.workspace = true
+domain.workspace = true
+ports.workspace = true
+crossterm.workspace = true
+ratatui.workspace = true
+zbus.workspace = true
+serde.workspace = true
+log.workspace = true
+ratatui-textarea.workspace = true

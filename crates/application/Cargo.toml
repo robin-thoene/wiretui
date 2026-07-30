@@ -12,6 +12,6 @@ repository.workspace = true
 name = "application"
 
 [dependencies]
-domain = { workspace = true }
-ports = { workspace = true }
-log = { workspace = true }
+domain.workspace = true
+ports.workspace = true
+log.workspace = true

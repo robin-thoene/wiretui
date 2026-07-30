@@ -10,10 +10,10 @@ repository = "https://github.com/robin-thoene/wiretui"
 
 [workspace.dependencies]
 # Internal
-adapters = { path = "./crates/adapters", package = "wiretui-adapters" }
-application = { path = "./crates/application", package = "wiretui-application" }
-domain = { path = "./crates/domain", package = "wiretui-domain" }
-ports = { path = "./crates/ports", package = "wiretui-ports" }
+adapters = { path = "./crates/adapters", package = "wiretui-adapters", version = "0.0.0" }
+application = { path = "./crates/application", package = "wiretui-application", version = "0.0.0" }
+domain = { path = "./crates/domain", package = "wiretui-domain", version = "0.0.0" }
+ports = { path = "./crates/ports", package = "wiretui-ports", version = "0.0.0" }
 # External
 env_logger = "0.11.10"
 log = "0.4.29"
