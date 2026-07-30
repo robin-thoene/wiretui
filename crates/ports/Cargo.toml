@@ -2,7 +2,7 @@
 name = "wiretui-ports"
 edition = "2024"
 description = "Defines all inbound and outbound traits"
-publish = false
+publish = true
 version.workspace = true
 authors.workspace = true
 license.workspace = true

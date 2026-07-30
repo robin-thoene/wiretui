@@ -2,7 +2,7 @@
 name = "wiretui-domain"
 edition = "2024"
 description = "Pure core structs and logic"
-publish = false
+publish = true
 version.workspace = true
 authors.workspace = true
 license.workspace = true
