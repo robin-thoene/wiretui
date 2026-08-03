@@ -2388,7 +2388,7 @@ dependencies = [
 
 [[package]]
 name = "wiretui-adapters"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "crossterm",
  "log",
@@ -2403,7 +2403,7 @@ dependencies = [
 
 [[package]]
 name = "wiretui-application"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "log",
  "wiretui-domain",
@@ -2412,7 +2412,7 @@ dependencies = [
 
 [[package]]
 name = "wiretui-bin"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "env_logger",
  "log",
@@ -2422,11 +2422,11 @@ dependencies = [
 
 [[package]]
 name = "wiretui-domain"
-version = "0.0.0"
+version = "0.0.1"
 
 [[package]]
 name = "wiretui-ports"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "wiretui-domain",
 ]
