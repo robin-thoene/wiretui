@@ -30,7 +30,7 @@ This installs the latest version that was released to
 [crates.io](https://crates.io/crates/wiretui-bin)
 
 ```shell
-cargo install wiretui-bin
+cargo install --locked wiretui-bin
 ```
 
 ### From source
