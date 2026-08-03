@@ -24,9 +24,18 @@ You will need to use a **Linux** based operating system using the **NetworkManag
 
 ## Installation
 
-Currently the only option to install is building from source, but it is planned to add pre-built
-binaries that you can download from releases
-([#3](https://github.com/robin-thoene/wiretui/issues/3)).
+### crates.io
+
+This installs the latest version that was released to
+[crates.io](https://crates.io/crates/wiretui-bin)
+
+```shell
+cargo install --locked wiretui-bin
+```
+
+### From source
+
+This installs the latest version of the source code
 
 ```shell
 git clone https://github.com/robin-thoene/wiretui.git
@@ -60,6 +69,8 @@ wiretui
 
 `CTRL+d`: delete the selected connection
 
+`/`: search the list of imported connections
+
 ## Local development
 
 ### CLI
@@ -67,7 +78,7 @@ wiretui
 Run the application
 
 ```shell
-cargo run --bin wiretui-bin
+cargo run --bin wiretui
 ```
 
 Run the tests

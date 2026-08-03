@@ -3,22 +3,22 @@ resolver = "3"
 members = ["crates/*"]
 
 [workspace.package]
-version = "0.0.0"
+version = "0.0.1"
 authors = ["robin-thoene"]
 license = "MIT"
 repository = "https://github.com/robin-thoene/wiretui"
 
 [workspace.dependencies]
 # Internal
-adapters = { path = "./crates/adapters", package = "wiretui-adapters", version = "0.0.0" }
-application = { path = "./crates/application", package = "wiretui-application", version = "0.0.0" }
-domain = { path = "./crates/domain", package = "wiretui-domain", version = "0.0.0" }
-ports = { path = "./crates/ports", package = "wiretui-ports", version = "0.0.0" }
+adapters = { path = "./crates/adapters", package = "wiretui-adapters", version = "0.0.1" }
+application = { path = "./crates/application", package = "wiretui-application", version = "0.0.1" }
+domain = { path = "./crates/domain", package = "wiretui-domain", version = "0.0.1" }
+ports = { path = "./crates/ports", package = "wiretui-ports", version = "0.0.1" }
 # External
-env_logger = "0.11.10"
-log = "0.4.29"
+env_logger = "0.11.11"
+log = "0.4.33"
 crossterm = "0.29.0"
-ratatui = "0.30.0"
-ratatui-textarea = "0.9.1"
-zbus = "5.15.0"
-serde = "1.0.228"
+ratatui = "0.30.2"
+ratatui-textarea = "0.9.2"
+zbus = "5.18.0"
+serde = "1.0.229"
