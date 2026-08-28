@@ -16,10 +16,12 @@ pub struct StatusBar<'a> {
 }
 
 impl<'a> StatusBar<'a> {
+    /// Display the search input
     pub fn show_search(&mut self) {
         self.show_search = true;
     }
 
+    /// Hide the search input
     pub fn hide_search(&mut self) {
         self.show_search = false;
     }
@@ -33,7 +35,7 @@ impl<'a> StatusBar<'a> {
         self.search_textarea.input(key_event);
     }
 
-    /// Clears the current value within the text area
+    /// Reset the search value
     pub fn clear(&mut self) {
         self.search_textarea.clear();
     }

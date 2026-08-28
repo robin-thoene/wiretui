@@ -166,10 +166,19 @@ where
         if self.mode == AppMode::Search {
             match key_event.code {
                 KeyCode::Esc => {
+                    self.status_bar.clear();
+                    self.refresh_connection_list();
                     self.status_bar.hide_search();
                     self.mode = AppMode::default();
                 }
                 KeyCode::Enter => {
+                    self.mode = AppMode::default();
+                    if self.status_bar.get_text().is_none_or(|x| x.is_empty()) {
+                        self.status_bar.hide_search();
+                    }
+                }
+                _ => {
+                    self.status_bar.handle_key_event(key_event);
                     let search_value = self.status_bar.get_text();
                     if let Some(search_value) = search_value
                         && !search_value.is_empty()
@@ -184,17 +193,13 @@ where
                             .cloned()
                             .collect::<Vec<WireGuardConnection>>();
                     } else {
-                        log::debug!("user submitted an empty search value value");
                         self.refresh_connection_list();
-                        self.status_bar.hide_search();
                     }
-                    self.mode = AppMode::default();
                     self.connections
                         .connection_list_state
                         .list_state
                         .select_first();
                 }
-                _ => self.status_bar.handle_key_event(key_event),
             }
             return;
         }
