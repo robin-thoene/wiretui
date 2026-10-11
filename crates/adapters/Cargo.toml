@@ -12,7 +12,6 @@ repository.workspace = true
 name = "adapters"
 
 [dependencies]
-application.workspace = true
 domain.workspace = true
 ports.workspace = true
 crossterm.workspace = true

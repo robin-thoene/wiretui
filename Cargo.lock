@@ -2395,7 +2395,6 @@ dependencies = [
  "ratatui",
  "ratatui-textarea",
  "serde",
- "wiretui-application",
  "wiretui-domain",
  "wiretui-ports",
  "zbus",
